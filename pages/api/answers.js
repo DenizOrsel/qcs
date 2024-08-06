@@ -3,7 +3,7 @@ import { getDbConnection } from "@/lib/db";
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
-    const { surveyId } = req.query;
+    const { surveyId, interviewId } = req.query;
 
     if (!surveyId) {
       return res.status(400).json({ error: "SurveyId is required" });
@@ -14,20 +14,42 @@ export default async function handler(req, res) {
       const request = pool.request();
       request.input("surveyId", sql.UniqueIdentifier, surveyId);
 
-      const result = await request.query(`
+      let query = `
         SELECT 
-          a.Id, 
-          a.AlphaValue, 
-          a.InterviewId, 
-          a.NumericValue, 
-          a.QuestionId, 
+          a.Id AS AnswerId,
+          a.AlphaValue,
+          a.InterviewId,
+          a.NumericValue,
+          a.QuestionId,
           a.CategoryValueId,
-          q.Text AS QuestionText
+          q.Text AS QuestionText,
+          i.Id AS InterviewId,
+          i.SampleDataRecordId,
+          i.EndTime,
+          i.StartTime,
+          i.Status,
+          i.Successful,
+          i.ResponseCode,
+          i.ProcessTime,
+          i.LastUpdated,
+          i.NfieldInterviewId,
+          i.ActiveSeconds,
+          i.Final,
+          i.Test,
+          i.CalculatedResult
         FROM dbo.Answers a
         JOIN dbo.Questions q ON a.QuestionId = q.Id
+        JOIN dbo.Interviews i ON a.InterviewId = i.SampleDataRecordId
         JOIN dbo.Surveys s ON q.SurveyId = s.Id
         WHERE s.NfieldSurveyId = @surveyId
-      `);
+      `;
+
+      if (interviewId) {
+        request.input("interviewId", sql.Int, interviewId);
+        query += ` AND i.NfieldInterviewId = @interviewId`;
+      }
+
+      const result = await request.query(query);
 
       res.status(200).json(result.recordset);
     } catch (error) {

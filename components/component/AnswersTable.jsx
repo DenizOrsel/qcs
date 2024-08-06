@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import axios from "axios";
 import {
   Table,
   TableHeader,
@@ -8,20 +8,19 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import axios from "axios";
 
-const AnswersTable = () => {
-  const router = useRouter();
-  const { surveyId } = router.query;
+const AnswersTable = ({ surveyId, interviewId }) => {
   const [answers, setAnswers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (surveyId) {
+    if (surveyId && interviewId) {
       const fetchAnswers = async () => {
         try {
-          const response = await axios.get(`/api/answers?surveyId=${surveyId}`);
+          const response = await axios.get(`/api/answers`, {
+            params: { surveyId, interviewId },
+          });
           setAnswers(response.data);
         } catch (error) {
           console.error("Error fetching answers:", error);
@@ -33,45 +32,34 @@ const AnswersTable = () => {
 
       fetchAnswers();
     }
-  }, [surveyId]);
+  }, [surveyId, interviewId]);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="bg-gray-900 text-gray-100 min-h-screen">
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Survey Answers</h1>
-        </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Id</TableHead>
-              <TableHead>InterviewId</TableHead>
-              <TableHead>QuestionId</TableHead>
-              <TableHead>QuestionText</TableHead>
-              <TableHead>AlphaValue</TableHead>
-              <TableHead>NumericValue</TableHead>
-              <TableHead>CategoryValueId</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {answers.map((answer) => (
-              <TableRow key={answer.Id}>
-                <TableCell>{answer.Id}</TableCell>
-                <TableCell>{answer.InterviewId}</TableCell>
-                <TableCell>{answer.QuestionId}</TableCell>
-                <TableCell>{answer.QuestionText}</TableCell>
-                <TableCell>{answer.AlphaValue || "NULL"}</TableCell>
-                <TableCell>{answer.NumericValue || "NULL"}</TableCell>
-                <TableCell>{answer.CategoryValueId || "NULL"}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>InterviewId</TableHead>
+          <TableHead>QuestionText</TableHead>
+          <TableHead>AlphaValue</TableHead>
+          <TableHead>NumericValue</TableHead>
+          <TableHead>CategoryValueId</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {answers.map((answer) => (
+          <TableRow key={answer.AnswerId}>
+            <TableCell>{answer.NfieldInterviewId}</TableCell>
+            <TableCell>{answer.QuestionText}</TableCell>
+            <TableCell>{answer.AlphaValue || "NULL"}</TableCell>
+            <TableCell>{answer.NumericValue || "NULL"}</TableCell>
+            <TableCell>{answer.CategoryValueId || "NULL"}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
 };
 

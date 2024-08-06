@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import axios from "axios";
-import AnswersTable from "./AnswersTable";
 
 export default function Qcontrol() {
   const router = useRouter();
@@ -32,6 +31,15 @@ export default function Qcontrol() {
     }
   };
 
+  const removeLeadingZeros = (str) => {
+    return str.replace(/^0+/, "") || "0";
+  };
+
+  const handleRowClick = (interviewId) => {
+    const formattedInterviewId = removeLeadingZeros(interviewId);
+    router.push(`/dashboard/${surveyId}/${formattedInterviewId}`);
+  };
+
   useEffect(() => {
     if (surveyId) {
       const fetchInterviews = async () => {
@@ -39,7 +47,7 @@ export default function Qcontrol() {
           const token = localStorage.getItem("token");
           const response = await axios.get("/api/interviewQuality", {
             headers: {
-              Authorization: `Basic ${token}`, // Ensure the token is prefixed with 'Basic'
+              Authorization: `Basic ${token}`,
             },
             params: {
               surveyId,
@@ -58,24 +66,21 @@ export default function Qcontrol() {
     }
   }, [surveyId]);
 
-    const getStatusText = (status) => {
-      switch (status) {
-        case 0:
-          return "Not Reviewed";
-        case 1:
-          return "Approved";
-        case 2:
-          return "Unverified";
-        case 3:
-          return "Rejected";
-        default:
-          return "";
-      }
-    };
+  const getStatusText = (status) => {
+    switch (status) {
+      case 0:
+        return "Not Reviewed";
+      case 1:
+        return "Approved";
+      case 2:
+        return "Unverified";
+      case 3:
+        return "Rejected";
+      default:
+        return "";
+    }
+  };
 
-      const removeLeadingZeros = (str) => {
-        return str.replace(/^0+/, "") || "0";
-      };
 
   const filteredAndSortedInterviews = useMemo(
     () =>
@@ -162,8 +167,14 @@ export default function Qcontrol() {
         </TableHeader>
         <TableBody>
           {filteredAndSortedInterviews.map((interview) => (
-            <TableRow key={interview.Id}>
-              <TableCell className="font-medium">{removeLeadingZeros(interview.Id)}</TableCell>
+            <TableRow
+              key={interview.Id}
+              onClick={() => handleRowClick(interview.Id)}
+              className="cursor-pointer"
+            >
+              <TableCell className="font-medium">
+                {removeLeadingZeros(interview.Id)}
+              </TableCell>
               <TableCell>
                 <Badge
                   variant={
@@ -191,7 +202,6 @@ export default function Qcontrol() {
           ))}
         </TableBody>
       </Table>
-      <AnswersTable />
     </div>
   );
 }
