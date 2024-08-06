@@ -1,16 +1,10 @@
 import { useEffect, useState } from "react";
+import React from "react";
 import axios from "axios";
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from "@/components/ui/table";
+import { Table, TableRow, TableBody, TableCell } from "@/components/ui/table";
 
 const AnswersTable = ({ surveyId, interviewId }) => {
-  const [answers, setAnswers] = useState([]);
+  const [groupedAnswers, setGroupedAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -21,7 +15,25 @@ const AnswersTable = ({ surveyId, interviewId }) => {
           const response = await axios.get(`/api/answers`, {
             params: { surveyId, interviewId },
           });
-          setAnswers(response.data);
+
+          const data = response.data;
+          const grouped = data.reduce((acc, answer) => {
+            if (!acc[answer.QuestionText]) {
+              acc[answer.QuestionText] = [];
+            }
+            const values = [
+              answer.AlphaValue,
+              answer.NumericValue,
+              answer.CategoryValueText,
+            ].filter((value) => value !== null && value !== "NULL");
+
+            if (values.length > 0) {
+              acc[answer.QuestionText].push(values.join(", "));
+            }
+            return acc;
+          }, {});
+
+          setGroupedAnswers(grouped);
         } catch (error) {
           console.error("Error fetching answers:", error);
           setError("Error fetching answers");
@@ -39,24 +51,18 @@ const AnswersTable = ({ surveyId, interviewId }) => {
 
   return (
     <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>InterviewId</TableHead>
-          <TableHead>QuestionText</TableHead>
-          <TableHead>AlphaValue</TableHead>
-          <TableHead>NumericValue</TableHead>
-          <TableHead>CategoryValueId</TableHead>
-        </TableRow>
-      </TableHeader>
       <TableBody>
-        {answers.map((answer) => (
-          <TableRow key={answer.AnswerId}>
-            <TableCell>{answer.NfieldInterviewId}</TableCell>
-            <TableCell>{answer.QuestionText}</TableCell>
-            <TableCell>{answer.AlphaValue || "NULL"}</TableCell>
-            <TableCell>{answer.NumericValue || "NULL"}</TableCell>
-            <TableCell>{answer.CategoryValueId || "NULL"}</TableCell>
-          </TableRow>
+        {Object.keys(groupedAnswers).map((questionText, index) => (
+          <React.Fragment key={index}>
+            <TableRow className="bg-transparent hover:bg-transparent">
+              <TableCell colSpan={5} className="p-4">
+                <section className="flex flex-col">
+                  <div className="font-bold text-lg">{questionText}</div>
+                  <div>{groupedAnswers[questionText].join(", ")}</div>
+                </section>
+              </TableCell>
+            </TableRow>
+          </React.Fragment>
         ))}
       </TableBody>
     </Table>
