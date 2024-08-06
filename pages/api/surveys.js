@@ -1,4 +1,5 @@
 import axios from "axios";
+import config from "@/components/Config";
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
@@ -11,7 +12,7 @@ export default async function handler(req, res) {
     try {
       // Fetch surveys
       const surveysResponse = await axios.get(
-        "https://api.nfieldmr.com/v1/Surveys",
+        `${config.apiBaseUrl}Surveys`,
         {
           headers: {
             Authorization: `Basic ${token}`,
@@ -31,10 +32,9 @@ export default async function handler(req, res) {
       const surveysWithAdditionalData = await Promise.all(
         nonBlueprintBasicSurveys.map(async (survey) => {
           try {
-            const [ qualityResponse ] = await Promise.all([
-              
+            const [qualityResponse] = await Promise.all([
               axios.get(
-                `https://api.nfieldmr.com/v1/Surveys/${survey.SurveyId}/InterviewQuality`,
+                `${config.apiBaseUrl}Surveys/${survey.SurveyId}/InterviewQuality`,
                 {
                   headers: {
                     Authorization: `Basic ${token}`,
