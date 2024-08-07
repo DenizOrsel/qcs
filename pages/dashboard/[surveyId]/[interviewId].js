@@ -4,6 +4,8 @@ import AnswersTable from "@/components/component/AnswersTable";
 import axios from "axios";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Toaster from "@/components/ui/toaster";
 
 const InterviewDetailsPage = () => {
   const router = useRouter();
@@ -11,6 +13,7 @@ const InterviewDetailsPage = () => {
   const [interviewDetails, setInterviewDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [toasterVisible, setToasterVisible] = useState(false);
 
   useEffect(() => {
     if (interviewId && surveyId) {
@@ -81,6 +84,34 @@ const InterviewDetailsPage = () => {
     window.open(url, "_blank");
   };
 
+  const updateInterviewQuality = async (newState) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `/api/updateInterviewQuality`,
+        {
+          surveyId,
+          interviewId,
+          newState,
+        },
+        {
+          headers: {
+            Authorization: token,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      setInterviewDetails((prevDetails) => ({
+        ...prevDetails,
+        InterviewQuality: newState,
+      }));
+      setToasterVisible(true);
+    } catch (error) {
+      console.error("Error updating interview quality:", error);
+      alert("Failed to update interview quality.");
+    }
+  };
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
@@ -145,10 +176,38 @@ const InterviewDetailsPage = () => {
                 "Not Available"
               )}
             </p>
+            <div className="mb-4">
+              <Button
+                className="mr-2"
+                onClick={() => updateInterviewQuality(0)}
+              >
+                Reset
+              </Button>
+              <Button
+                className="mr-2"
+                onClick={() => updateInterviewQuality(1)}
+              >
+                Approve
+              </Button>
+              <Button
+                className="mr-2"
+                onClick={() => updateInterviewQuality(2)}
+              >
+                Unverify
+              </Button>
+              <Button onClick={() => updateInterviewQuality(3)}>
+                Reject
+              </Button>
+            </div>
           </>
         )}
         <AnswersTable surveyId={surveyId} interviewId={interviewId} />
       </div>
+      <Toaster
+        message="Interview status is updated"
+        visible={toasterVisible}
+        onClose={() => setToasterVisible(false)}
+      />
     </div>
   );
 };
