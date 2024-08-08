@@ -50,7 +50,7 @@ export default function Surveylist() {
   };
 
   return (
-    <div className="bg-gray-900 text-gray-100 min-h-screen">
+    <div className="min-h-screen">
       <div className="container mx-auto py-8 px-4">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">CAPI Surveys</h1>
@@ -74,7 +74,7 @@ export default function Surveylist() {
               <TableRow>
                 <TableHead>Survey Name</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Not Checked</TableHead>
+                <TableHead>Not Reviewed</TableHead>
                 <TableHead>Approved</TableHead>
                 <TableHead>Unverified</TableHead>
                 <TableHead>Rejected</TableHead>

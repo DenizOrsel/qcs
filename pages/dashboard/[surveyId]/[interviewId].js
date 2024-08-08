@@ -120,85 +120,86 @@ const InterviewDetailsPage = () => {
     : null;
 
   return (
-    <div className="bg-gray-900 text-gray-100 min-h-screen">
+    <div className="min-h-screen">
+      <Button onClick={() => router.push(`/dashboard/${surveyId}`)}>
+        Back
+      </Button>
       <div className="container mx-auto py-8 px-4">
-        <button
-          onClick={() => router.push(`/dashboard/${surveyId}`)}
-          className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Back
-        </button>
         {interviewDetails && (
           <>
-            <div className="flex items-center mb-4">
-              <h1 className="text-2xl font-bold mr-2">
-                {interviewDetails.SurveyName} Interview{" "}
-                {interviewDetails.InterviewNumber}
-              </h1>
-              <Badge
-                variant={
-                  interviewDetails.InterviewQuality === 1
-                    ? "outline"
-                    : interviewDetails.InterviewQuality === 3
-                    ? "secondary"
-                    : "default"
-                }
-              >
-                {getStatusText(interviewDetails.InterviewQuality)}
-              </Badge>
+            <div className="flex items-center mb-4 justify-between">
+              <div className="flex items-center">
+                <h1 className="text-2xl font-bold mr-2">
+                  {interviewDetails.SurveyName} Interview{" "}
+                  {interviewDetails.InterviewNumber}
+                </h1>
+                <Badge
+                  variant={
+                    interviewDetails.InterviewQuality === 1
+                      ? "outline"
+                      : interviewDetails.InterviewQuality === 3
+                      ? "secondary"
+                      : "default"
+                  }
+                >
+                  {getStatusText(interviewDetails.InterviewQuality)}
+                </Badge>
+              </div>
+              <div className="flex items-center">
+                <Button
+                  className="mr-2"
+                  onClick={() => updateInterviewQuality(0)}
+                >
+                  Reset
+                </Button>
+                <Button
+                  className="mr-2"
+                  onClick={() => updateInterviewQuality(1)}
+                >
+                  Approve
+                </Button>
+                <Button
+                  className="mr-2"
+                  onClick={() => updateInterviewQuality(2)}
+                >
+                  Unverify
+                </Button>
+                <Button onClick={() => updateInterviewQuality(3)}>
+                  Reject
+                </Button>
+              </div>
             </div>
-            <p className="mb-2">
-              Interviewer ID: {interviewDetails.InterviewerId}
-            </p>
-            <p className="mb-2">
-              Duration: {formatDuration(interviewDetails.ActiveSeconds)}
-            </p>
             <Card className="mb-4">
               <CardHeader>
-                <CardTitle>Client Information</CardTitle>
+                <CardTitle>Details</CardTitle>
               </CardHeader>
               <CardContent>
+                <p className="mb-2">
+                  Interviewer ID: {interviewDetails.InterviewerId}
+                </p>
+                <p className="mb-2">
+                  Duration: {formatDuration(interviewDetails.ActiveSeconds)}
+                </p>
                 <pre className="whitespace-pre-wrap break-all">
                   {interviewDetails.ClientInformation}
                 </pre>
+                <p className="mb-4">
+                  Location :{" "}
+                  {location ? (
+                    <button
+                      onClick={() =>
+                        openMap(location.latitude, location.longitude)
+                      }
+                      className="text-blue-500 underline"
+                    >
+                      Check on map
+                    </button>
+                  ) : (
+                    "Not Available"
+                  )}
+                </p>
               </CardContent>
             </Card>
-            <p className="mb-4">
-              Location :{" "}
-              {location ? (
-                <button
-                  onClick={() => openMap(location.latitude, location.longitude)}
-                  className="text-blue-500 underline"
-                >
-                  Check on map
-                </button>
-              ) : (
-                "Not Available"
-              )}
-            </p>
-            <div className="mb-4">
-              <Button
-                className="mr-2"
-                onClick={() => updateInterviewQuality(0)}
-              >
-                Reset
-              </Button>
-              <Button
-                className="mr-2"
-                onClick={() => updateInterviewQuality(1)}
-              >
-                Approve
-              </Button>
-              <Button
-                className="mr-2"
-                onClick={() => updateInterviewQuality(2)}
-              >
-                Unverify
-              </Button>
-              <Button onClick={() => updateInterviewQuality(3)}>
-                Reject
-              </Button>
-            </div>
           </>
         )}
         <AnswersTable surveyId={surveyId} interviewId={interviewId} />

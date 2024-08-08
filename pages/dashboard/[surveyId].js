@@ -2,6 +2,7 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { Button } from "@/components/ui/button";
 import Qcontrol from "@/components/component/qcontrol";
 
 const SurveyDetails = () => {
@@ -40,13 +41,13 @@ const SurveyDetails = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="p-4 md:p-8">
-      <button onClick={() => router.push("/dashboard")}>Back</button>
-      <h1 className="text-xl md:text-2xl mb-4">
-        Survey {surveyData.Name}
-      </h1>
-      <Qcontrol />
-    </div>
+    <>
+        <Button onClick={() => router.push("/dashboard")}>Back</Button>
+      <div className="p-8 md:p-8 m-8">
+        <h1 className="text-xl md:text-2xl mb-4">Survey {surveyData.Name}</h1>
+        <Qcontrol />
+      </div>
+    </>
   );
 };
 

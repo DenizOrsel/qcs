@@ -49,11 +49,11 @@ export function LoginUI() {
         </CardHeader>
         <CardContent className="space-y-4">
           <form onSubmit={handleSubmit}>
-            <div className="space-y-2">
+            <div className="space-y-1 mt-3">
               <Label htmlFor="domain">Domain</Label>
               <Input id="domain" type="text" value={domainname} onChange={(e) => setDomainname(e.target.value)} placeholder="example.com" required />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1 mt-3">
               <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
@@ -64,7 +64,7 @@ export function LoginUI() {
                 required
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1 mt-3">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"

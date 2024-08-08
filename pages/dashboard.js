@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Surveylist from "@/components/component/surveylist";
 import refreshToken from "@/components/RefreshToken";
+import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
   const [auth, setAuth] = useState(false);
@@ -30,7 +31,7 @@ export default function Dashboard() {
   return (
     <ProtectedRoute>
       <div>
-        <button
+        <Button
           onClick={() => {
             localStorage.removeItem("token");
             localStorage.removeItem("domainname");
@@ -38,10 +39,10 @@ export default function Dashboard() {
             localStorage.removeItem("password");
             router.push("/");
           }}
-          className="mt-4 bg-red-500 p-2 rounded text-white"
+          className="mt-4 p-2"
         >
           Logout
-        </button>
+        </Button>
         <Surveylist />
       </div>
     </ProtectedRoute>
