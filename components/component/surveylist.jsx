@@ -10,6 +10,8 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import axios from "axios";
+import Loader from "@/components/ui/loader";
+import Error from "@/components/component/Error";
 
 export default function Surveylist() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -65,9 +67,9 @@ export default function Surveylist() {
           />
         </div>
         {loading ? (
-          <p>Loading...</p>
+          <Loader />
         ) : error ? (
-          <p>{error}</p>
+          <p>{error}. Please refresh this page.</p>
         ) : (
           <Table>
             <TableHeader>

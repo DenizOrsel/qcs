@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Toaster from "@/components/ui/toaster";
+import Loader from "@/components/ui/loader";
+import Error from "@/components/component/Error";
 
 const InterviewDetailsPage = () => {
   const router = useRouter();
@@ -112,9 +114,8 @@ const InterviewDetailsPage = () => {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
-
+  if (loading) return (<Loader />);
+  if (error) return <Error error={error} />;
   const location = interviewDetails
     ? parseLocationInfo(interviewDetails.LocationInfo)
     : null;
@@ -122,7 +123,20 @@ const InterviewDetailsPage = () => {
   return (
     <div className="min-h-screen">
       <Button onClick={() => router.push(`/dashboard/${surveyId}`)}>
-        Back
+        <span>&#8592;</span>
+      </Button>
+      <Button
+        onClick={() => {
+          localStorage.removeItem("token");
+          localStorage.removeItem("domainname");
+          localStorage.removeItem("username");
+          localStorage.removeItem("password");
+          router.push("/");
+        }}
+        className="mt-4 p-2 mr-2"
+        style={{ float: "right" }}
+      >
+        Logout
       </Button>
       <div className="container mx-auto py-8 px-4">
         {interviewDetails && (

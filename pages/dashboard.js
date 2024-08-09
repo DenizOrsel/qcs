@@ -24,7 +24,7 @@ export default function Dashboard() {
     } else {
       setAuth(true);
     }
-  }, []);
+  }, [router]);
 
   if (!auth) return null;
 
@@ -39,7 +39,8 @@ export default function Dashboard() {
             localStorage.removeItem("password");
             router.push("/");
           }}
-          className="mt-4 p-2"
+          className="mt-4 p-2 mr-2"
+          style={{ float: "right" }}
         >
           Logout
         </Button>

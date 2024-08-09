@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import Qcontrol from "@/components/component/qcontrol";
+import Loader from "@/components/ui/loader";
+import Error from "@/components/component/Error";
 
 const SurveyDetails = () => {
   const router = useRouter();
@@ -37,12 +39,27 @@ const SurveyDetails = () => {
     }
   }, [surveyId]);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
+  if (loading) return <Loader />;
+  if (error) return <Error error={error} />;
 
   return (
     <>
-        <Button onClick={() => router.push("/dashboard")}>Back</Button>
+      <Button onClick={() => router.push("/dashboard")} className="ml-2">
+        <span>&#8592;</span>
+      </Button>
+      <Button
+        onClick={() => {
+          localStorage.removeItem("token");
+          localStorage.removeItem("domainname");
+          localStorage.removeItem("username");
+          localStorage.removeItem("password");
+          router.push("/");
+        }}
+        className="mt-4 p-2 mr-2"
+        style={{ float: "right" }}
+      >
+        Logout
+      </Button>
       <div className="p-8 md:p-8 m-8">
         <h1 className="text-xl md:text-2xl mb-4">Survey {surveyData.Name}</h1>
         <Qcontrol />

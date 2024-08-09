@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import axios from "axios";
+import Error from "@/components/component/Error";
 
 export default function Qcontrol() {
   const router = useRouter();
@@ -107,7 +108,7 @@ export default function Qcontrol() {
   );
 
   if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (error) return <Error error={error} />;
 
   return (
     <div className="flex flex-col gap-4">
