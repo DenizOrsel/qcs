@@ -1,3 +1,4 @@
+/* globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -26,12 +27,28 @@
     --radius: 0.5rem;
   }
 
-}
-
-@layer base {
-  * {
-    @apply border-border;
+  .dark {
+    --background: 240 3% 18%;
+    --foreground: 60 4% 92%;
+    --primary: 240 6% 70%;
+    --primary-foreground: 60 3% 90%;
+    --secondary: 240 5% 22%;
+    --secondary-foreground: 60 4% 95%;
+    --accent: 240 6% 33%;
+    --accent-foreground: 60 4% 90%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 2% 98%;
+    --muted: 240 4% 32%;
+    --muted-foreground: 60 4% 88%;
+    --card: 240 5% 25%;
+    --card-foreground: 60 5% 90%;
+    --popover: 240 5% 20%;
+    --popover-foreground: 60 4% 88%;
+    --border: 240 6% 25%;
+    --input: 240 6% 25%;
+    --ring: 240 6% 80%;
   }
+  
   body {
     @apply bg-background text-foreground;
   }
@@ -41,10 +58,10 @@
     font-weight: bold;
     /* Add any other desired styles here */
   }
+  
   button {
     margin-top: 1rem;
   }
-  
 }
 
 @layer utilities {
