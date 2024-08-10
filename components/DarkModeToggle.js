@@ -2,18 +2,18 @@ import { useEffect, useState } from "react";
 import { SunIcon, MoonIcon } from "@radix-ui/react-icons";
 
 export default function DarkModeToggle() {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true); // Set initial state to true
 
   useEffect(() => {
     const theme = localStorage.getItem("theme");
     if (
-      theme === "dark" ||
-      (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
+      theme === "light" || // Change to check for light theme
+      (!theme && !window.matchMedia("(prefers-color-scheme: dark)").matches) // Invert this condition
     ) {
-      document.documentElement.classList.add("dark");
-      setDarkMode(true);
-    } else {
       document.documentElement.classList.remove("dark");
+      setDarkMode(false); // Set darkMode to false when in light mode
+    } else {
+      document.documentElement.classList.add("dark");
     }
   }, []);
 
@@ -40,9 +40,9 @@ export default function DarkModeToggle() {
           } w-5 h-5 transform bg-gray-400 rounded-full transition-transform flex items-center justify-center`}
         >
           {darkMode ? (
-            <SunIcon className="text-white" />
+            <MoonIcon className="text-gray-700" /> // Display MoonIcon in dark mode
           ) : (
-            <MoonIcon className="text-gray-700" />
+            <SunIcon className="text-white" /> // Display SunIcon in light mode
           )}
         </span>
       </button>

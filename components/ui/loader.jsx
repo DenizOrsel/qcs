@@ -20,7 +20,7 @@ const Loader = () => {
         style={{ width: "20%", height: "20%" }}
       >
         <rect
-          fill="#fff"
+          className="fill-black dark:fill-white"
           width="3"
           height="100"
           transform="translate(0) rotate(180 3 50)"
@@ -35,7 +35,7 @@ const Loader = () => {
         </rect>
         <rect
           x="17"
-          fill="#fff"
+          className="fill-black dark:fill-white"
           width="3"
           height="100"
           transform="translate(0) rotate(180 20 50)"
@@ -51,7 +51,7 @@ const Loader = () => {
         </rect>
         <rect
           x="40"
-          fill="#fff"
+          className="fill-black dark:fill-white"
           width="3"
           height="100"
           transform="translate(0) rotate(180 40 50)"
@@ -67,7 +67,7 @@ const Loader = () => {
         </rect>
         <rect
           x="60"
-          fill="#fff"
+          className="fill-black dark:fill-white"
           width="3"
           height="100"
           transform="translate(0) rotate(180 58 50)"
@@ -83,7 +83,7 @@ const Loader = () => {
         </rect>
         <rect
           x="80"
-          fill="#fff"
+          className="fill-black dark:fill-white"
           width="3"
           height="100"
           transform="translate(0) rotate(180 76 50)"

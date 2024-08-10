@@ -10,6 +10,7 @@ import Error from "@/components/component/Error";
 import LogoutButton from "@/components/ui/LogoutButton";
 import BackButton from "@/components/ui/backButton";
 import { UpdateIcon } from "@radix-ui/react-icons";
+import Audioplayback from "@/components/component/Audioplayback";
 
 
 const InterviewDetailsPage = () => {
@@ -286,6 +287,7 @@ const updateInterviewQuality = async (newState, buttonType) => {
           </>
         )}
         <AnswersTable surveyId={surveyId} interviewId={interviewId} />
+        <Audioplayback time={formatDuration(interviewDetails.ActiveSeconds)} />
       </div>
       <Toaster
         message="Interview status is updated"
