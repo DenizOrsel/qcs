@@ -3,11 +3,12 @@ import { useEffect, useState } from "react";
 import AnswersTable from "@/components/component/AnswersTable";
 import axios from "axios";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Toaster from "@/components/ui/toaster";
 import Loader from "@/components/ui/loader";
 import Error from "@/components/component/Error";
+import LogoutButton from "@/components/ui/logoutButton";
+import BackButton from "@/components/ui/backButton";
 
 const InterviewDetailsPage = () => {
   const router = useRouter();
@@ -114,30 +115,18 @@ const InterviewDetailsPage = () => {
     }
   };
 
-  if (loading) return (<Loader />);
+  if (loading) return <Loader />;
   if (error) return <Error error={error} />;
   const location = interviewDetails
     ? parseLocationInfo(interviewDetails.LocationInfo)
     : null;
 
+  const clientInformation = JSON.parse(interviewDetails.ClientInformation);
+
   return (
     <div className="min-h-screen">
-      <Button onClick={() => router.push(`/dashboard/${surveyId}`)}>
-        <span>&#8592;</span>
-      </Button>
-      <Button
-        onClick={() => {
-          localStorage.removeItem("token");
-          localStorage.removeItem("domainname");
-          localStorage.removeItem("username");
-          localStorage.removeItem("password");
-          router.push("/");
-        }}
-        className="mt-4 p-2 mr-2"
-        style={{ float: "right" }}
-      >
-        Logout
-      </Button>
+      <BackButton href={`/dashboard/${surveyId}`} />
+      <LogoutButton />
       <div className="container mx-auto py-8 px-4">
         {interviewDetails && (
           <>
@@ -163,57 +152,101 @@ const InterviewDetailsPage = () => {
                 <Button
                   className="mr-2"
                   onClick={() => updateInterviewQuality(0)}
+                  disabled={interviewDetails.InterviewQuality === 0}
                 >
                   Reset
                 </Button>
                 <Button
                   className="mr-2"
                   onClick={() => updateInterviewQuality(1)}
+                  disabled={interviewDetails.InterviewQuality === 1}
                 >
                   Approve
                 </Button>
                 <Button
                   className="mr-2"
                   onClick={() => updateInterviewQuality(2)}
+                  disabled={interviewDetails.InterviewQuality === 2}
                 >
                   Unverify
                 </Button>
-                <Button onClick={() => updateInterviewQuality(3)}>
+                <Button
+                  onClick={() => updateInterviewQuality(3)}
+                  disabled={interviewDetails.InterviewQuality === 3}
+                >
                   Reject
                 </Button>
               </div>
             </div>
-            <Card className="mb-4">
-              <CardHeader>
-                <CardTitle>Details</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="mb-2">
-                  Interviewer ID: {interviewDetails.InterviewerId}
-                </p>
-                <p className="mb-2">
-                  Duration: {formatDuration(interviewDetails.ActiveSeconds)}
-                </p>
-                <pre className="whitespace-pre-wrap break-all">
-                  {interviewDetails.ClientInformation}
-                </pre>
-                <p className="mb-4">
-                  Location :{" "}
+            <div className="mt-6 grid grid-cols-1 gap-6 rounded-lg border bg-card p-6 shadow-sm sm:grid-cols-2">
+              <div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  Interviewer Id
+                </div>
+                <div className="text-base font-medium">
+                  {interviewDetails.InterviewerId}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  Duration
+                </div>
+                <div className="text-base font-medium">
+                  {formatDuration(interviewDetails.ActiveSeconds)}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  App Version
+                </div>
+                <div className="text-base font-medium">
+                  {clientInformation.version}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  Device Name
+                </div>
+                <div className="text-base font-medium">
+                  {clientInformation.deviceName}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  Manufacturer
+                </div>
+                <div className="text-base font-medium">
+                  {clientInformation.manufacturer}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  Operating System
+                </div>
+                <div className="text-base font-medium">
+                  {clientInformation.operatingSystemVersion}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-muted-foreground">
+                  Location
+                </div>
+                <div className="text-base font-medium">
                   {location ? (
                     <button
                       onClick={() =>
                         openMap(location.latitude, location.longitude)
                       }
-                      className="text-blue-500 underline"
+                      className="text-blue-500 underline mt-2"
                     >
-                      Check on map
+                      See map
                     </button>
                   ) : (
                     "Not Available"
                   )}
-                </p>
-              </CardContent>
-            </Card>
+                </div>
+              </div>
+            </div>
           </>
         )}
         <AnswersTable surveyId={surveyId} interviewId={interviewId} />

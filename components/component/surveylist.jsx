@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/table";
 import axios from "axios";
 import Loader from "@/components/ui/loader";
-import Error from "@/components/component/Error";
 
 export default function Surveylist() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [sort, setSort] = useState({ key: "SurveyName", order: "asc" });
   const [surveys, setSurveys] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -41,11 +41,30 @@ export default function Surveylist() {
     fetchSurveys();
   }, []);
 
-  const filteredSurveys = surveys
-    .filter((survey) => !survey.IsBlueprint)
-    .filter((survey) =>
-      survey.SurveyName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+  const handleSort = (key) => {
+    if (sort.key === key) {
+      setSort({ key, order: sort.order === "asc" ? "desc" : "asc" });
+    } else {
+      setSort({ key, order: "asc" });
+    }
+  };
+
+  const filteredAndSortedSurveys = useMemo(
+    () =>
+      surveys
+        .filter((survey) => !survey.IsBlueprint)
+        .filter((survey) =>
+          survey.SurveyName.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        .sort((a, b) => {
+          if (sort.order === "asc") {
+            return a[sort.key] > b[sort.key] ? 1 : -1;
+          } else {
+            return a[sort.key] < b[sort.key] ? 1 : -1;
+          }
+        }),
+    [searchTerm, sort, surveys]
+  );
 
   const handleRowClick = (surveyId) => {
     router.push(`/dashboard/${surveyId}`);
@@ -74,8 +93,28 @@ export default function Surveylist() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Survey Name</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => handleSort("SurveyName")}
+                >
+                  Survey Name
+                  {sort.key === "SurveyName" && (
+                    <span className="ml-1">
+                      {sort.order === "asc" ? "\u2191" : "\u2193"}
+                    </span>
+                  )}
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => handleSort("SurveyState")}
+                >
+                  Status
+                  {sort.key === "SurveyState" && (
+                    <span className="ml-1">
+                      {sort.order === "asc" ? "\u2191" : "\u2193"}
+                    </span>
+                  )}
+                </TableHead>
                 <TableHead>Not Reviewed</TableHead>
                 <TableHead>Approved</TableHead>
                 <TableHead>Unverified</TableHead>
@@ -83,7 +122,7 @@ export default function Surveylist() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredSurveys.map((survey) => (
+              {filteredAndSortedSurveys.map((survey) => (
                 <TableRow
                   key={survey.SurveyId}
                   onClick={() => handleRowClick(survey.SurveyId)}

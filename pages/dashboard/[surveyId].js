@@ -2,10 +2,11 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Button } from "@/components/ui/button";
 import Qcontrol from "@/components/component/qcontrol";
 import Loader from "@/components/ui/loader";
 import Error from "@/components/component/Error";
+import LogoutButton from "@/components/ui/logoutButton";
+import BackButton from "@/components/ui/backButton";
 
 const SurveyDetails = () => {
   const router = useRouter();
@@ -44,22 +45,8 @@ const SurveyDetails = () => {
 
   return (
     <>
-      <Button onClick={() => router.push("/dashboard")} className="ml-2">
-        <span>&#8592;</span>
-      </Button>
-      <Button
-        onClick={() => {
-          localStorage.removeItem("token");
-          localStorage.removeItem("domainname");
-          localStorage.removeItem("username");
-          localStorage.removeItem("password");
-          router.push("/");
-        }}
-        className="mt-4 p-2 mr-2"
-        style={{ float: "right" }}
-      >
-        Logout
-      </Button>
+      <BackButton href={`/dashboard`} />
+      <LogoutButton />
       <div className="p-8 md:p-8 m-8">
         <h1 className="text-xl md:text-2xl mb-4">Survey {surveyData.Name}</h1>
         <Qcontrol />
@@ -67,6 +54,5 @@ const SurveyDetails = () => {
     </>
   );
 };
-
 
 export default SurveyDetails;

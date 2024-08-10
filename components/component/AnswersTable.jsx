@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import React from "react";
 import axios from "axios";
-import { Table, TableRow, TableBody, TableCell } from "@/components/ui/table";
+import Error from "@/components/component/Error";
+import { Input } from "@/components/ui/input";
 
 const AnswersTable = ({ surveyId, interviewId }) => {
   const [groupedAnswers, setGroupedAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     if (surveyId && interviewId) {
@@ -46,26 +48,43 @@ const AnswersTable = ({ surveyId, interviewId }) => {
     }
   }, [surveyId, interviewId]);
 
+  const handleSearch = (e) => setSearch(e.target.value);
+
+  const filteredQuestions = useMemo(() => {
+    const searchValue = search.toLowerCase();
+    return Object.keys(groupedAnswers).filter((questionText) =>
+      questionText.toLowerCase().includes(searchValue)
+    );
+  }, [search, groupedAnswers]);
+
   if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
+  if (error) return <Error error={error} />;
 
   return (
-    <Table>
-      <TableBody>
-        {Object.keys(groupedAnswers).map((questionText, index) => (
-          <React.Fragment key={index}>
-            <TableRow className="bg-transparent hover:bg-transparent">
-              <TableCell colSpan={5} className="p-4">
-                <section className="flex flex-col">
-                  <div className="font-bold text-lg">{questionText}</div>
-                  <div>{groupedAnswers[questionText].join(", ")}</div>
-                </section>
-              </TableCell>
-            </TableRow>
-          </React.Fragment>
-        ))}
-      </TableBody>
-    </Table>
+    <div className="mt-6 rounded-lg border bg-card p-6 shadow-sm">
+      <h2 className="text-lg font-medium">Answers</h2>
+      <Input
+        placeholder="Search questions..."
+        value={search}
+        onChange={handleSearch}
+        className="mt-4"
+      />
+      <div className="mt-4 space-y-4">
+        <div>
+          {filteredQuestions.map((questionText, index) => (
+            <React.Fragment key={index}>
+              <div className="text-sm font-medium text-muted-foreground mt-5">
+                Q: {questionText}
+              </div>
+
+              <div className="text-base font-medium">
+                A: {groupedAnswers[questionText].join(", ")}
+              </div>
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 
