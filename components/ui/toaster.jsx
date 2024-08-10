@@ -11,7 +11,7 @@ const Toaster = ({ message, visible, onClose }) => {
 
   return (
     <div
-      className={`fixed bottom-4 right-4 transition-opacity duration-500 z-50 ${
+      className={`fixed bottom-4 left-4 transition-opacity duration-500 ${
         visible ? "opacity-100" : "opacity-0"
       }`}
     >
