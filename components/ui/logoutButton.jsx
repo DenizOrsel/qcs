@@ -13,6 +13,7 @@ const LogoutButton = () => {
         localStorage.removeItem("domainname");
         localStorage.removeItem("username");
         localStorage.removeItem("password");
+        
         router.push("/");
       }}
       className="mt-4 p-2 mr-2"
