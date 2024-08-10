@@ -30,10 +30,8 @@ export default function Dashboard() {
 
   return (
     <ProtectedRoute>
-      <div>
         <LogoutButton />
         <Surveylist />
-      </div>
     </ProtectedRoute>
   );
 }

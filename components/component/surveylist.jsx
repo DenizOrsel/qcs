@@ -41,30 +41,40 @@ export default function Surveylist() {
     fetchSurveys();
   }, []);
 
-  const handleSort = (key) => {
-    if (sort.key === key) {
-      setSort({ key, order: sort.order === "asc" ? "desc" : "asc" });
-    } else {
-      setSort({ key, order: "asc" });
-    }
-  };
+const handleSort = (key) => {
+  if (sort.key === key) {
+    setSort({ key, order: sort.order === "asc" ? "desc" : "asc" });
+  } else {
+    setSort({ key, order: "asc" });
+  }
+};
 
-  const filteredAndSortedSurveys = useMemo(
-    () =>
-      surveys
-        .filter((survey) => !survey.IsBlueprint)
-        .filter((survey) =>
-          survey.SurveyName.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-        .sort((a, b) => {
-          if (sort.order === "asc") {
-            return a[sort.key] > b[sort.key] ? 1 : -1;
-          } else {
-            return a[sort.key] < b[sort.key] ? 1 : -1;
-          }
-        }),
-    [searchTerm, sort, surveys]
-  );
+const filteredAndSortedSurveys = useMemo(
+  () =>
+    surveys
+      .filter((survey) => !survey.IsBlueprint)
+      .filter((survey) =>
+        survey.SurveyName.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => {
+        const aValue =
+          typeof a[sort.key] === "number"
+            ? a[sort.key]
+            : a.InterviewQualityCounts?.[sort.key];
+        const bValue =
+          typeof b[sort.key] === "number"
+            ? b[sort.key]
+            : b.InterviewQualityCounts?.[sort.key];
+
+        if (sort.order === "asc") {
+          return aValue > bValue ? 1 : -1;
+        } else {
+          return aValue < bValue ? 1 : -1;
+        }
+      }),
+  [searchTerm, sort, surveys]
+);
+
 
   const handleRowClick = (surveyId) => {
     router.push(`/dashboard/${surveyId}`);
@@ -74,8 +84,9 @@ export default function Surveylist() {
     <div className="min-h-screen">
       <div className="container mx-auto py-8 px-4">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">CAPI Surveys</h1>
-          <p>Domain: {localStorage.getItem("domainname")}</p>
+          <h1 className="text-2xl font-bold">
+            CAPI Surveys on {localStorage.getItem("domainname")}
+          </h1>
         </div>
         <div className="mb-4">
           <Input
@@ -115,10 +126,50 @@ export default function Surveylist() {
                     </span>
                   )}
                 </TableHead>
-                <TableHead>Not Reviewed</TableHead>
-                <TableHead>Approved</TableHead>
-                <TableHead>Unverified</TableHead>
-                <TableHead>Rejected</TableHead>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => handleSort(0)}
+                >
+                  Not Reviewed
+                  {sort.key === 0 && (
+                    <span className="ml-1">
+                      {sort.order === "asc" ? "\u2191" : "\u2193"}
+                    </span>
+                  )}
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => handleSort(1)}
+                >
+                  Approved
+                  {sort.key === 1 && (
+                    <span className="ml-1">
+                      {sort.order === "asc" ? "\u2191" : "\u2193"}
+                    </span>
+                  )}
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => handleSort(2)}
+                >
+                  Unverified
+                  {sort.key === 2 && (
+                    <span className="ml-1">
+                      {sort.order === "asc" ? "\u2191" : "\u2193"}
+                    </span>
+                  )}
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => handleSort(3)}
+                >
+                  Rejected
+                  {sort.key === 3 && (
+                    <span className="ml-1">
+                      {sort.order === "asc" ? "\u2191" : "\u2193"}
+                    </span>
+                  )}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
