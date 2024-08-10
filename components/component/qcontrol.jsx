@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import axios from "axios";
 import Error from "@/components/component/Error";
+import Loader from "@/components/ui/loader";
 
 export default function Qcontrol() {
   const router = useRouter();
@@ -107,7 +108,7 @@ export default function Qcontrol() {
     [search, sort, interviews]
   );
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Loader />;
   if (error) return <Error error={error} />;
 
   return (

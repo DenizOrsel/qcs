@@ -9,14 +9,18 @@ import Loader from "@/components/ui/loader";
 import Error from "@/components/component/Error";
 import LogoutButton from "@/components/ui/LogoutButton";
 import BackButton from "@/components/ui/backButton";
+import { UpdateIcon } from "@radix-ui/react-icons";
+
 
 const InterviewDetailsPage = () => {
   const router = useRouter();
   const { surveyId, interviewId } = router.query;
   const [interviewDetails, setInterviewDetails] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingButton, setLoadingButton] = useState(null);
   const [error, setError] = useState(null);
   const [toasterVisible, setToasterVisible] = useState(false);
+
 
   useEffect(() => {
     if (interviewId && surveyId) {
@@ -87,33 +91,36 @@ const InterviewDetailsPage = () => {
     window.open(url, "_blank");
   };
 
-  const updateInterviewQuality = async (newState) => {
-    try {
-      const token = localStorage.getItem("token");
-      await axios.put(
-        `/api/updateInterviewQuality`,
-        {
-          surveyId,
-          interviewId,
-          newState,
+const updateInterviewQuality = async (newState, buttonType) => {
+  setLoadingButton(buttonType); 
+  try {
+    const token = localStorage.getItem("token");
+    await axios.put(
+      `/api/updateInterviewQuality`,
+      {
+        surveyId,
+        interviewId,
+        newState,
+      },
+      {
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
         },
-        {
-          headers: {
-            Authorization: token,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      setInterviewDetails((prevDetails) => ({
-        ...prevDetails,
-        InterviewQuality: newState,
-      }));
-      setToasterVisible(true);
-    } catch (error) {
-      console.error("Error updating interview quality:", error);
-      alert("Failed to update interview quality.");
-    }
-  };
+      }
+    );
+    setInterviewDetails((prevDetails) => ({
+      ...prevDetails,
+      InterviewQuality: newState,
+    }));
+    setToasterVisible(true);
+  } catch (error) {
+    console.error("Error updating interview quality:", error);
+    alert("Failed to update interview quality.");
+  } finally {
+    setLoadingButton(null); }
+};
+
 
   if (loading) return <Loader />;
   if (error) return <Error error={error} />;
@@ -150,31 +157,60 @@ const InterviewDetailsPage = () => {
               </div>
               <div className="flex items-center">
                 <Button
-                  className="mr-2"
-                  onClick={() => updateInterviewQuality(0)}
-                  disabled={interviewDetails.InterviewQuality === 0}
+                  className="mr-2 min-w-[100px]" // Set the min-width to the max width required by your text labels
+                  onClick={() => updateInterviewQuality(0, "reset")}
+                  disabled={
+                    interviewDetails.InterviewQuality === 0 ||
+                    loadingButton !== null
+                  }
                 >
-                  Reset
+                  {loadingButton === "reset" ? (
+                    <UpdateIcon className="animate-spin" />
+                  ) : (
+                    "Reset"
+                  )}
                 </Button>
                 <Button
-                  className="mr-2"
-                  onClick={() => updateInterviewQuality(1)}
-                  disabled={interviewDetails.InterviewQuality === 1}
+                  className="mr-2 min-w-[100px]" // Same fixed width
+                  onClick={() => updateInterviewQuality(1, "approve")}
+                  disabled={
+                    interviewDetails.InterviewQuality === 1 ||
+                    loadingButton !== null
+                  }
                 >
-                  Approve
+                  {loadingButton === "approve" ? (
+                    <UpdateIcon className="animate-spin" />
+                  ) : (
+                    "Approve"
+                  )}
                 </Button>
                 <Button
-                  className="mr-2"
-                  onClick={() => updateInterviewQuality(2)}
-                  disabled={interviewDetails.InterviewQuality === 2}
+                  className="mr-2 min-w-[100px]" // Same fixed width
+                  onClick={() => updateInterviewQuality(2, "unverify")}
+                  disabled={
+                    interviewDetails.InterviewQuality === 2 ||
+                    loadingButton !== null
+                  }
                 >
-                  Unverify
+                  {loadingButton === "unverify" ? (
+                    <UpdateIcon className="animate-spin" />
+                  ) : (
+                    "Unverify"
+                  )}
                 </Button>
                 <Button
-                  onClick={() => updateInterviewQuality(3)}
-                  disabled={interviewDetails.InterviewQuality === 3}
+                  className="min-w-[100px]" // Same fixed width
+                  onClick={() => updateInterviewQuality(3, "reject")}
+                  disabled={
+                    interviewDetails.InterviewQuality === 3 ||
+                    loadingButton !== null
+                  }
                 >
-                  Reject
+                  {loadingButton === "reject" ? (
+                    <UpdateIcon className="animate-spin" />
+                  ) : (
+                    "Reject"
+                  )}
                 </Button>
               </div>
             </div>
