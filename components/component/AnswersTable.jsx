@@ -3,6 +3,7 @@ import React from "react";
 import axios from "axios";
 import Error from "@/components/component/Error";
 import { Input } from "@/components/ui/input";
+import Loader from "@/components/ui/loader";
 
 const AnswersTable = ({ surveyId, interviewId }) => {
   const [groupedAnswers, setGroupedAnswers] = useState({});
@@ -57,7 +58,7 @@ const AnswersTable = ({ surveyId, interviewId }) => {
     );
   }, [search, groupedAnswers]);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Loader />;
   if (error) return <Error error={error} />;
 
   return (
