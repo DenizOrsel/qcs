@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import Toaster from "@/components/ui/toaster";
 import Loader from "@/components/ui/loader";
 import Error from "@/components/component/Error";
-import LogoutButton from "@/components/ui/logoutButton";
+import LogoutButton from "@/components/ui/LogoutButton";
 import BackButton from "@/components/ui/backButton";
 
 const InterviewDetailsPage = () => {

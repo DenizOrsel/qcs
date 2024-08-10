@@ -5,7 +5,7 @@ import axios from "axios";
 import Qcontrol from "@/components/component/qcontrol";
 import Loader from "@/components/ui/loader";
 import Error from "@/components/component/Error";
-import LogoutButton from "@/components/ui/logoutButton";
+import LogoutButton from "@/components/ui/LogoutButton";
 import BackButton from "@/components/ui/backButton";
 
 const SurveyDetails = () => {
