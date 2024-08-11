@@ -5,13 +5,12 @@ import axios from "axios";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Toaster from "@/components/ui/toaster";
-import Loader from "@/components/ui/loader";
+import Loader from "@/components/ui/Loader";
 import Error from "@/components/component/Error";
 import LogoutButton from "@/components/ui/LogoutButton";
 import BackButton from "@/components/ui/backButton";
 import { UpdateIcon } from "@radix-ui/react-icons";
 import Audioplayback from "@/components/component/Audioplayback";
-
 
 const InterviewDetailsPage = () => {
   const router = useRouter();
@@ -21,7 +20,6 @@ const InterviewDetailsPage = () => {
   const [loadingButton, setLoadingButton] = useState(null);
   const [error, setError] = useState(null);
   const [toasterVisible, setToasterVisible] = useState(false);
-
 
   useEffect(() => {
     if (interviewId && surveyId) {
@@ -92,36 +90,36 @@ const InterviewDetailsPage = () => {
     window.open(url, "_blank");
   };
 
-const updateInterviewQuality = async (newState, buttonType) => {
-  setLoadingButton(buttonType); 
-  try {
-    const token = localStorage.getItem("token");
-    await axios.put(
-      `/api/updateInterviewQuality`,
-      {
-        surveyId,
-        interviewId,
-        newState,
-      },
-      {
-        headers: {
-          Authorization: token,
-          "Content-Type": "application/json",
+  const updateInterviewQuality = async (newState, buttonType) => {
+    setLoadingButton(buttonType);
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `/api/updateInterviewQuality`,
+        {
+          surveyId,
+          interviewId,
+          newState,
         },
-      }
-    );
-    setInterviewDetails((prevDetails) => ({
-      ...prevDetails,
-      InterviewQuality: newState,
-    }));
-    setToasterVisible(true);
-  } catch (error) {
-    console.error("Error updating interview quality:", error);
-    alert("Failed to update interview quality.");
-  } finally {
-    setLoadingButton(null); }
-};
-
+        {
+          headers: {
+            Authorization: token,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      setInterviewDetails((prevDetails) => ({
+        ...prevDetails,
+        InterviewQuality: newState,
+      }));
+      setToasterVisible(true);
+    } catch (error) {
+      console.error("Error updating interview quality:", error);
+      alert("Failed to update interview quality.");
+    } finally {
+      setLoadingButton(null);
+    }
+  };
 
   if (loading) return <Loader />;
   if (error) return <Error error={error} />;
@@ -158,7 +156,7 @@ const updateInterviewQuality = async (newState, buttonType) => {
               </div>
               <div className="flex items-center">
                 <Button
-                  className="mr-2 min-w-[100px]" // Set the min-width to the max width required by your text labels
+                  className="mr-2 min-w-[100px]"
                   onClick={() => updateInterviewQuality(0, "reset")}
                   disabled={
                     interviewDetails.InterviewQuality === 0 ||

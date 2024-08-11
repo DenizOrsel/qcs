@@ -10,7 +10,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import axios from "axios";
-import Loader from "@/components/ui/loader";
+import Loader from "@/components/ui/Loader";
 
 export default function Surveylist() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,40 +41,39 @@ export default function Surveylist() {
     fetchSurveys();
   }, []);
 
-const handleSort = (key) => {
-  if (sort.key === key) {
-    setSort({ key, order: sort.order === "asc" ? "desc" : "asc" });
-  } else {
-    setSort({ key, order: "asc" });
-  }
-};
+  const handleSort = (key) => {
+    if (sort.key === key) {
+      setSort({ key, order: sort.order === "asc" ? "desc" : "asc" });
+    } else {
+      setSort({ key, order: "asc" });
+    }
+  };
 
-const filteredAndSortedSurveys = useMemo(
-  () =>
-    surveys
-      .filter((survey) => !survey.IsBlueprint)
-      .filter((survey) =>
-        survey.SurveyName.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      .sort((a, b) => {
-        const aValue =
-          typeof a[sort.key] === "number"
-            ? a[sort.key]
-            : a.InterviewQualityCounts?.[sort.key];
-        const bValue =
-          typeof b[sort.key] === "number"
-            ? b[sort.key]
-            : b.InterviewQualityCounts?.[sort.key];
+  const filteredAndSortedSurveys = useMemo(
+    () =>
+      surveys
+        .filter((survey) => !survey.IsBlueprint)
+        .filter((survey) =>
+          survey.SurveyName.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        .sort((a, b) => {
+          const aValue =
+            typeof a[sort.key] === "number"
+              ? a[sort.key]
+              : a.InterviewQualityCounts?.[sort.key];
+          const bValue =
+            typeof b[sort.key] === "number"
+              ? b[sort.key]
+              : b.InterviewQualityCounts?.[sort.key];
 
-        if (sort.order === "asc") {
-          return aValue > bValue ? 1 : -1;
-        } else {
-          return aValue < bValue ? 1 : -1;
-        }
-      }),
-  [searchTerm, sort, surveys]
-);
-
+          if (sort.order === "asc") {
+            return aValue > bValue ? 1 : -1;
+          } else {
+            return aValue < bValue ? 1 : -1;
+          }
+        }),
+    [searchTerm, sort, surveys]
+  );
 
   const handleRowClick = (surveyId) => {
     router.push(`/dashboard/${surveyId}`);

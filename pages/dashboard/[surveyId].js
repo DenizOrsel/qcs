@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Qcontrol from "@/components/component/qcontrol";
-import Loader from "@/components/ui/loader";
+import Loader from "@/components/ui/Loader";
 import Error from "@/components/component/Error";
 import LogoutButton from "@/components/ui/LogoutButton";
 import BackButton from "@/components/ui/backButton";

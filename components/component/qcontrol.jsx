@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import axios from "axios";
 import Error from "@/components/component/Error";
-import Loader from "@/components/ui/loader";
+import Loader from "@/components/ui/Loader";
 
 export default function Qcontrol() {
   const router = useRouter();
