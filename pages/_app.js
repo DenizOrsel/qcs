@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import "@/styles/globals.css";
 import { DarkModeProvider } from "@/context/DarkModeContext";
 import DarkModeToggle from "@/components/DarkModeToggle";
+import TokenRefresher from "@/components/TokenRefresher";
 
 const fontHeading = Manrope({
   subsets: ["latin"],
@@ -23,7 +24,7 @@ export default function App({ Component, pageProps }) {
         className={cn("antialiased", fontHeading.variable, fontBody.variable)}
       >
         <DarkModeToggle />
-
+        <TokenRefresher />
         <Component {...pageProps} />
       </div>
     </DarkModeProvider>

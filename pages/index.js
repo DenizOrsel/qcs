@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Inter } from "next/font/google";
 import { Button } from "@/components/ui/button";
-
+import { ArrowRightIcon } from "@radix-ui/react-icons";
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
@@ -28,11 +28,15 @@ export default function Home() {
       <div className="flex items-center justify-center gap-4">
         <Link href="/login">
           <Button className="flex items-center justify-center">
-            QC System
+            QC System <ArrowRightIcon className="ml-2" />
           </Button>
         </Link>
-        <Button className="flex items-center justify-center" disabled>IP System</Button>
-        <Button className="flex items-center justify-center" disabled>Visualization</Button>
+        <Button className="flex items-center justify-center" disabled>
+          IP Reports
+        </Button>
+        <Button className="flex items-center justify-center" disabled>
+          Visualization
+        </Button>
       </div>
     </main>
   );
