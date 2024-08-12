@@ -18,7 +18,7 @@ const SurveyDetails = () => {
     if (surveyId) {
       const fetchSurveyData = async () => {
         try {
-          const token = localStorage.getItem("token");
+          const token = sessionStorage.getItem("token");
           const apiBaseUrl = localStorage.getItem("apiBaseUrl");
           const response = await axios.get("/api/surveydetails", {
             headers: {

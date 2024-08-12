@@ -25,7 +25,7 @@ const InterviewDetailsPage = () => {
     if (interviewId && surveyId) {
       const fetchInterviewDetails = async () => {
         try {
-          const token = localStorage.getItem("token");
+          const token = sessionStorage.getItem("token");
           const apiBaseUrl = localStorage.getItem("apiBaseUrl");
           const response = await axios.get(`/api/interviewDetails`, {
             params: { interviewId, surveyId },
@@ -95,7 +95,7 @@ const InterviewDetailsPage = () => {
   const updateInterviewQuality = async (newState, buttonType) => {
     setLoadingButton(buttonType);
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const apiBaseUrl = localStorage.getItem("apiBaseUrl");
       await axios.put(
         `/api/updateInterviewQuality`,
@@ -174,7 +174,7 @@ const InterviewDetailsPage = () => {
                   )}
                 </Button>
                 <Button
-                  className="mr-2 min-w-[100px]" // Same fixed width
+                  className="mr-2 min-w-[100px]" 
                   onClick={() => updateInterviewQuality(1, "approve")}
                   disabled={
                     interviewDetails.InterviewQuality === 1 ||
@@ -188,7 +188,7 @@ const InterviewDetailsPage = () => {
                   )}
                 </Button>
                 <Button
-                  className="mr-2 min-w-[100px]" // Same fixed width
+                  className="mr-2 min-w-[100px]" 
                   onClick={() => updateInterviewQuality(2, "unverify")}
                   disabled={
                     interviewDetails.InterviewQuality === 2 ||
@@ -202,7 +202,7 @@ const InterviewDetailsPage = () => {
                   )}
                 </Button>
                 <Button
-                  className="min-w-[100px]" // Same fixed width
+                  className="min-w-[100px]" 
                   onClick={() => updateInterviewQuality(3, "reject")}
                   disabled={
                     interviewDetails.InterviewQuality === 3 ||

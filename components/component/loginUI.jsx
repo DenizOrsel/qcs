@@ -39,10 +39,10 @@ export function LoginUI() {
         }
       );
       const token = response.data.token;
-      localStorage.setItem("token", token);
-      localStorage.setItem("domainname", domainname);
-      localStorage.setItem("username", username);
-      localStorage.setItem("password", password);
+      sessionStorage.setItem("token", token);
+      sessionStorage.setItem("domainname", domainname);
+      sessionStorage.setItem("username", username);
+      sessionStorage.setItem("password", password);
       router.push("/dashboard");
     } catch (err) {
       setError("Invalid credentials");

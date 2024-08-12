@@ -8,10 +8,10 @@ const LogoutButton = () => {
     <Button
       variant="ghost"
       onClick={() => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("domainname");
-        localStorage.removeItem("username");
-        localStorage.removeItem("password");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("domainname");
+        sessionStorage.removeItem("username");
+        sessionStorage.removeItem("password");
 
         router.push("/");
       }}
