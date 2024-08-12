@@ -1,9 +1,9 @@
 import axios from "axios";
-import config from "@/components/Config";
 
 export default async function handler(req, res) {
   if (req.method === "PUT") {
     const token = req.headers["authorization"];
+    const apiBaseUrl = req.headers["x-custom-url"];
     const { surveyId, interviewId, newState } = req.body;
 
     if (!token) {
@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
     try {
       const response = await axios.put(
-        `${config.apiBaseUrl}Surveys/${surveyId}/InterviewQuality`,
+        `${apiBaseUrl}Surveys/${surveyId}/InterviewQuality`,
         {
           InterviewId: interviewId,
           NewState: newState,

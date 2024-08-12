@@ -26,11 +26,13 @@ const InterviewDetailsPage = () => {
       const fetchInterviewDetails = async () => {
         try {
           const token = localStorage.getItem("token");
+          const apiBaseUrl = localStorage.getItem("apiBaseUrl");
           const response = await axios.get(`/api/interviewDetails`, {
             params: { interviewId, surveyId },
             headers: {
               Authorization: token,
               "Content-Type": "application/json",
+              "X-Custom-Url": apiBaseUrl,
             },
           });
           setInterviewDetails(response.data);
@@ -94,6 +96,7 @@ const InterviewDetailsPage = () => {
     setLoadingButton(buttonType);
     try {
       const token = localStorage.getItem("token");
+      const apiBaseUrl = localStorage.getItem("apiBaseUrl");
       await axios.put(
         `/api/updateInterviewQuality`,
         {
@@ -105,6 +108,7 @@ const InterviewDetailsPage = () => {
           headers: {
             Authorization: token,
             "Content-Type": "application/json",
+            "X-Custom-Url": apiBaseUrl,
           },
         }
       );

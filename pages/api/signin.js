@@ -1,15 +1,15 @@
 import axios from "axios";
 import { getDbConnection } from "@/lib/db";
-import config from "@/components/Config";
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
     const { domainname, username, password } = req.body;
+    const apiBaseUrl = req.headers["x-custom-url"];
 
     try {
       // Sign in using the external API
       const response = await axios.post(
-        `${config.apiBaseUrl}SignIn`,
+        `${apiBaseUrl}SignIn`,
         {
           Domain: domainname,
           Username: username,

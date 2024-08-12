@@ -1,19 +1,16 @@
-// pages/api/surveydetails.js
 import axios from "axios";
-import config from "@/components/Config";
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
-    const  token  = req.headers["authorization"];
+    const token = req.headers["authorization"];
+    const apiBaseUrl = req.headers["x-custom-url"];
     const { surveyId } = req.query;
-    
-
     if (!token) {
       return res.status(401).json({ error: "Unauthorized" });
     }
     try {
       const response = await axios.get(
-        `${config.apiBaseUrl}Surveys/${surveyId}/GeneralSettings`,
+        `${apiBaseUrl}Surveys/${surveyId}/GeneralSettings`,
         {
           headers: {
             Authorization: `Basic ${token}`,

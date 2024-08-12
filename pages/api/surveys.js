@@ -1,9 +1,9 @@
 import axios from "axios";
-import config from "@/components/Config";
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
     const { token } = req.headers;
+    const apiBaseUrl = req.headers["x-custom-url"];
 
     if (!token) {
       return res.status(401).json({ error: "Unauthorized" });
@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     try {
       // Fetch surveys
       const surveysResponse = await axios.get(
-        `${config.apiBaseUrl}Surveys`,
+        `${apiBaseUrl}Surveys`,
         {
           headers: {
             Authorization: `Basic ${token}`,
@@ -34,7 +34,7 @@ export default async function handler(req, res) {
           try {
             const [qualityResponse] = await Promise.all([
               axios.get(
-                `${config.apiBaseUrl}Surveys/${survey.SurveyId}/InterviewQuality`,
+                `${apiBaseUrl}Surveys/${survey.SurveyId}/InterviewQuality`,
                 {
                   headers: {
                     Authorization: `Basic ${token}`,

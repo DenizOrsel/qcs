@@ -1,4 +1,3 @@
-// pages/dashboard/[surveyId].js
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -20,9 +19,11 @@ const SurveyDetails = () => {
       const fetchSurveyData = async () => {
         try {
           const token = localStorage.getItem("token");
+          const apiBaseUrl = localStorage.getItem("apiBaseUrl");
           const response = await axios.get("/api/surveydetails", {
             headers: {
               Authorization: token,
+              'X-Custom-Url': apiBaseUrl,
             },
             params: {
               surveyId,

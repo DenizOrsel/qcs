@@ -1,11 +1,12 @@
 import axios from "axios";
 import sql from "mssql";
 import { getDbConnection } from "@/lib/db";
-import config from "@/components/Config";
+
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
     const token = req.headers["authorization"];
+    const apiBaseUrl = req.headers["x-custom-url"];
     const { interviewId, surveyId } = req.query;
 
     if (!token) {
@@ -21,7 +22,7 @@ export default async function handler(req, res) {
     try {
       // Fetch InterviewQuality from Nfield API
       const nfieldResponse = await axios.get(
-        `${config.apiBaseUrl}Surveys/${surveyId}/InterviewQuality/${interviewId}`,
+        `${apiBaseUrl}Surveys/${surveyId}/InterviewQuality/${interviewId}`,
         {
           headers: {
             Authorization: `Basic ${token}`,

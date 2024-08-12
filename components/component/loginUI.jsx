@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export function LoginUI() {
+  
+  const [region, setRegion] = useState("");
   const [domainname, setDomainname] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -22,21 +24,45 @@ export function LoginUI() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("/api/signin", {
-        domainname,
-        username,
-        password,
-      });
-            const token = response.data.token;
-            localStorage.setItem("token", token);
-            localStorage.setItem("domainname", domainname);
-            localStorage.setItem("username", username);
-            localStorage.setItem("password", password);
+      const apiBaseUrl = localStorage.getItem("apiBaseUrl");
+      const response = await axios.post(
+        "/api/signin",
+        {
+          domainname,
+          username,
+          password,
+        },
+        {
+          headers: {
+            "X-Custom-Url": apiBaseUrl,
+          },
+        }
+      );
+      const token = response.data.token;
+      localStorage.setItem("token", token);
+      localStorage.setItem("domainname", domainname);
+      localStorage.setItem("username", username);
+      localStorage.setItem("password", password);
       router.push("/dashboard");
     } catch (err) {
       setError("Invalid credentials");
     }
   };
+
+      const handleRegionChange = (e) => {
+        const selectedRegion = e.target.value;
+        setRegion(selectedRegion);
+
+        const apiUrls = {
+          Americas: "https://apiam.nfieldmr.com/v1/",
+          Europe: "https://api.nfieldmr.com/v1/",
+          AsiaPacific: "https://apiap.nfieldmr.com/v1/",
+          China: "https://apicn.nfieldmr.com/v1/",
+        };
+
+        const apiUrl = apiUrls[selectedRegion];
+        localStorage.setItem("apiBaseUrl", apiUrl);
+      };
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-background dark:bg-background-dark">
@@ -44,14 +70,40 @@ export function LoginUI() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Login</CardTitle>
           <CardDescription>
-            Enter your domain, username, and password to access your account.
+            Select Region and enter your domain, username, and password to
+            access your account.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <form onSubmit={handleSubmit}>
             <div className="space-y-1 mt-3">
+              <Label htmlFor="region">Region</Label>
+              <select
+                id="region"
+                value={region}
+                onChange={handleRegionChange}
+                required
+                className="w-full p-2 border rounded cursor-pointer dark:bg-background"
+              >
+                <option value="" disabled>
+                  Select your region
+                </option>
+                <option value="Europe">Europe</option>
+                <option value="AsiaPacific">APAC</option>
+                <option value="Americas">AMER</option>
+                <option value="China">China</option>
+              </select>
+            </div>
+            <div className="space-y-1 mt-3">
               <Label htmlFor="domain">Domain</Label>
-              <Input id="domain" type="text" value={domainname} onChange={(e) => setDomainname(e.target.value)} placeholder="example.com" required />
+              <Input
+                id="domain"
+                type="text"
+                value={domainname}
+                onChange={(e) => setDomainname(e.target.value)}
+                placeholder="example.com"
+                required
+              />
             </div>
             <div className="space-y-1 mt-3">
               <Label htmlFor="username">Username</Label>

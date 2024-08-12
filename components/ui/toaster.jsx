@@ -15,7 +15,7 @@ const Toaster = ({ message, visible, onClose }) => {
         visible ? "opacity-100" : "opacity-0"
       }`}
     >
-      <Card className="p-4 bg-blue-900 text-white">{message}</Card>
+      <Card className="p-4 bg-blue-500 text-white">{message}</Card>
     </div>
   );
 };

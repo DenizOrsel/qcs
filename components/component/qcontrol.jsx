@@ -47,9 +47,11 @@ export default function Qcontrol() {
       const fetchInterviews = async () => {
         try {
           const token = localStorage.getItem("token");
+          const apiBaseUrl = localStorage.getItem("apiBaseUrl");
           const response = await axios.get("/api/interviewQuality", {
             headers: {
               Authorization: `Basic ${token}`,
+              "X-Custom-Url": apiBaseUrl,
             },
             params: {
               surveyId,

@@ -1,10 +1,10 @@
 import axios from "axios";
-import config from "@/components/Config";
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
     const { surveyId } = req.query;
     const { authorization } = req.headers;
+    const apiBaseUrl = req.headers["x-custom-url"];
 
     if (!authorization || !surveyId) {
       return res.status(400).json({ error: "Missing token or surveyId" });
@@ -12,7 +12,7 @@ export default async function handler(req, res) {
 
     try {
       const qualityResponse = await axios.get(
-        `${config.apiBaseUrl}Surveys/${surveyId}/InterviewQuality`,
+        `${apiBaseUrl}Surveys/${surveyId}/InterviewQuality`,
         {
           headers: {
             Authorization: authorization,

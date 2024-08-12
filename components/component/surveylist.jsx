@@ -24,9 +24,11 @@ export default function Surveylist() {
     const fetchSurveys = async () => {
       try {
         const token = localStorage.getItem("token");
+        const apiBaseUrl = localStorage.getItem("apiBaseUrl");
         const response = await axios.get("/api/surveys", {
           headers: {
             token: token,
+            "X-Custom-Url": apiBaseUrl,
           },
         });
         setSurveys(response.data);
