@@ -67,7 +67,7 @@ const AnswersTable = ({ surveyId, interviewId }) => {
   if (error) return <Error error={error} />;
 
   return (
-    <div className="mt-6 rounded-lg border bg-card p-6 shadow-sm">
+    <div className="mt-6 rounded-lg border bg-card p-6 shadow-sm mb-20">
       <h2 className="text-lg font-medium">Answers</h2>
       <Input
         placeholder="Search questions..."
