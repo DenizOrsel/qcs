@@ -86,7 +86,7 @@ export default function Surveylist() {
       <div className="container mx-auto py-8 px-4">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">
-            CAPI Surveys on {localStorage.getItem("domainname")}
+            CAPI Surveys on {sessionStorage.getItem("domainname")}
           </h1>
         </div>
         <div className="mb-4">
