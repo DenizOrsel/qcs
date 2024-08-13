@@ -101,7 +101,7 @@ export function LoginUI() {
                 type="text"
                 value={domainname}
                 onChange={(e) => setDomainname(e.target.value)}
-                placeholder="example.com"
+                placeholder="Nfield domain name"
                 required
               />
             </div>
