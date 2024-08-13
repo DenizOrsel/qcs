@@ -11,18 +11,20 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { UpdateIcon } from "@radix-ui/react-icons";
 
 export function LoginUI() {
-  
   const [region, setRegion] = useState("");
   const [domainname, setDomainname] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const apiBaseUrl = localStorage.getItem("apiBaseUrl");
       const response = await axios.post(
@@ -46,23 +48,25 @@ export function LoginUI() {
       router.push("/dashboard");
     } catch (err) {
       setError("Invalid credentials");
+    } finally {
+      setLoading(false);
     }
   };
 
-      const handleRegionChange = (e) => {
-        const selectedRegion = e.target.value;
-        setRegion(selectedRegion);
+  const handleRegionChange = (e) => {
+    const selectedRegion = e.target.value;
+    setRegion(selectedRegion);
 
-        const apiUrls = {
-          Americas: "https://apiam.nfieldmr.com/v1/",
-          Europe: "https://api.nfieldmr.com/v1/",
-          AsiaPacific: "https://apiap.nfieldmr.com/v1/",
-          China: "https://apicn.nfieldmr.com/v1/",
-        };
+    const apiUrls = {
+      Americas: "https://apiam.nfieldmr.com/v1/",
+      Europe: "https://api.nfieldmr.com/v1/",
+      AsiaPacific: "https://apiap.nfieldmr.com/v1/",
+      China: "https://apicn.nfieldmr.com/v1/",
+    };
 
-        const apiUrl = apiUrls[selectedRegion];
-        localStorage.setItem("apiBaseUrl", apiUrl);
-      };
+    const apiUrl = apiUrls[selectedRegion];
+    localStorage.setItem("apiBaseUrl", apiUrl);
+  };
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-background dark:bg-background-dark">
@@ -127,8 +131,8 @@ export function LoginUI() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full">
-              Login
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? <UpdateIcon className="animate-spin" /> : "Login"}
             </Button>
           </form>
           {error && <p>{error}</p>}
