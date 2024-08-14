@@ -23,6 +23,7 @@ const InterviewDetailsPage = () => {
   const [toasterVisible, setToasterVisible] = useState(false);
   const [downloadedFiles, setDownloadedFiles] = useState([]);
   const [answersLoaded, setAnswersLoaded] = useState(false);
+  const [audioFile, setAudioFile] = useState(null);
 
   useEffect(() => {
     if (interviewId && surveyId) {
@@ -68,6 +69,13 @@ const InterviewDetailsPage = () => {
       );
 
       setDownloadedFiles(response.data.files);
+
+      const audioFile = response.data.files.find(
+        (file) =>
+          file.filename.includes("silent") && file.filename.endsWith(".mpeg4")
+      );
+      setAudioFile(audioFile);
+
     } catch (error) {
       console.error("Error downloading package:", error);
       alert("Failed to download package.");
@@ -164,26 +172,27 @@ const InterviewDetailsPage = () => {
   if (loading) return <Loader />;
   if (error) return <Error error={error} />;
 
-  const renderAnswerWithImages = (answer) => {
-    const matchingFile = downloadedFiles.find((file) => {
-      const fileNamePart = file.filename.split("_")[1];
-      return answer.includes(fileNamePart);
-    });
+const renderAnswerWithImages = (answer) => {
+  const matchingFile = downloadedFiles.find((file) => {
+    const fileNamePart = file.filename.split("_")[1];
+    return answer.includes(fileNamePart);
+  });
 
-    if (matchingFile && matchingFile.filename.endsWith(".jpg")) {
-      return (
-        <Image
-          src={`data:image/jpeg;base64,${matchingFile.content}`}
-          alt={matchingFile.filename}
-          width="500"
-          height="500"
-          className="rounded-lg border border-gray-300 shadow-lg"
-        />
-      );
-    } else {
-      return answer;
-    }
-  };
+  if (matchingFile && matchingFile.filename.endsWith(".jpg")) {
+    return (
+      <Image
+        src={`data:image/jpeg;base64,${matchingFile.content}`}
+        alt={matchingFile.filename}
+        width="500"
+        height="500"
+        className="rounded-lg border border-gray-300 shadow-lg"
+      />
+    );
+  } else {
+    return answer;
+  }
+};
+
 
   const location = interviewDetails
     ? parseLocationInfo(interviewDetails.LocationInfo)
@@ -373,7 +382,10 @@ const InterviewDetailsPage = () => {
           renderAnswerWithImages={renderAnswerWithImages}
           onLoaded={handleAnswersLoaded}
         />
-        <Audioplayback time={formatDuration(interviewDetails.ActiveSeconds)} />
+        {audioFile && (
+          <Audioplayback audioSrc={`data:audio/mpeg;base64,${audioFile.content}`}
+          />
+        )}
       </div>
       <Toaster
         message="Interview status is updated"

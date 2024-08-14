@@ -8,7 +8,6 @@ import { UpdateIcon } from "@radix-ui/react-icons";
 const AnswersTable = ({
   surveyId,
   interviewId,
-  downloadedFiles,
   renderAnswerWithImages,
   onLoaded,
 }) => {
@@ -48,7 +47,7 @@ const AnswersTable = ({
           setError("Error fetching answers");
         } finally {
           setLoading(false);
-          onLoaded(); // Notify that loading is complete
+          onLoaded();
         }
       };
 
@@ -91,9 +90,25 @@ const AnswersTable = ({
               </div>
               <div className="text-base font-medium">
                 A:{" "}
-                {groupedAnswers[questionText].map((answer) =>
-                  renderAnswerWithImages(answer)
-                )}
+                {(() => {
+                  const answers = groupedAnswers[questionText].map((answer) =>
+                    renderAnswerWithImages(answer)
+                  );
+                  const textAnswers = answers
+                    .filter((answer) => typeof answer === "string")
+                    .join(", ");
+                  const imageAnswers = answers.filter(
+                    (answer) => typeof answer !== "string"
+                  );
+                  return (
+                    <>
+                      {textAnswers}
+                      {imageAnswers.map((image, idx) => (
+                        <React.Fragment key={idx}>{image}</React.Fragment>
+                      ))}
+                    </>
+                  );
+                })()}
               </div>
             </React.Fragment>
           ))}
