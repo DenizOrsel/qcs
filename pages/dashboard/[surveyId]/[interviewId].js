@@ -9,8 +9,9 @@ import Loader from "@/components/ui/Loader";
 import Error from "@/components/component/Error";
 import LogoutButton from "@/components/ui/LogoutButton";
 import BackButton from "@/components/ui/backButton";
-import { UpdateIcon } from "@radix-ui/react-icons";
 import Audioplayback from "@/components/component/Audioplayback";
+import { UpdateIcon } from "@radix-ui/react-icons";
+import Image from "next/image";
 
 const InterviewDetailsPage = () => {
   const router = useRouter();
@@ -20,6 +21,8 @@ const InterviewDetailsPage = () => {
   const [loadingButton, setLoadingButton] = useState(null);
   const [error, setError] = useState(null);
   const [toasterVisible, setToasterVisible] = useState(false);
+  const [downloadedFiles, setDownloadedFiles] = useState([]);
+  const [answersLoaded, setAnswersLoaded] = useState(false);
 
   useEffect(() => {
     if (interviewId && surveyId) {
@@ -47,6 +50,39 @@ const InterviewDetailsPage = () => {
       fetchInterviewDetails();
     }
   }, [interviewId, surveyId]);
+
+  const downloadPackage = async () => {
+    try {
+      const token = sessionStorage.getItem("token");
+      const apiBaseUrl = localStorage.getItem("apiBaseUrl");
+
+      const response = await axios.post(
+        `/api/downloadpackage?surveyId=${surveyId}&interviewId=${interviewId}`,
+        {},
+        {
+          headers: {
+            Authorization: token,
+            "x-custom-url": apiBaseUrl,
+          },
+        }
+      );
+
+      setDownloadedFiles(response.data.files);
+    } catch (error) {
+      console.error("Error downloading package:", error);
+      alert("Failed to download package.");
+    }
+  };
+
+  useEffect(() => {
+    if (answersLoaded) {
+      downloadPackage();
+    }
+  }, [answersLoaded]);
+
+  const handleAnswersLoaded = () => {
+    setAnswersLoaded(true);
+  };
 
   const getStatusText = (status) => {
     switch (status) {
@@ -127,6 +163,28 @@ const InterviewDetailsPage = () => {
 
   if (loading) return <Loader />;
   if (error) return <Error error={error} />;
+
+  const renderAnswerWithImages = (answer) => {
+    const matchingFile = downloadedFiles.find((file) => {
+      const fileNamePart = file.filename.split("_")[1];
+      return answer.includes(fileNamePart);
+    });
+
+    if (matchingFile && matchingFile.filename.endsWith(".jpg")) {
+      return (
+        <Image
+          src={`data:image/jpeg;base64,${matchingFile.content}`}
+          alt={matchingFile.filename}
+          width="500"
+          height="500"
+          className="rounded-lg border border-gray-300 shadow-lg"
+        />
+      );
+    } else {
+      return answer;
+    }
+  };
+
   const location = interviewDetails
     ? parseLocationInfo(interviewDetails.LocationInfo)
     : null;
@@ -160,7 +218,12 @@ const InterviewDetailsPage = () => {
               </div>
               <div className="flex items-center">
                 <Button
-                  className="mr-2 min-w-[100px]"
+                  className={`mr-2 min-w-[100px] ${
+                    interviewDetails.InterviewQuality === 0 ||
+                    loadingButton !== null
+                      ? "cursor-not-allowed"
+                      : ""
+                  }`}
                   onClick={() => updateInterviewQuality(0, "reset")}
                   disabled={
                     interviewDetails.InterviewQuality === 0 ||
@@ -174,7 +237,12 @@ const InterviewDetailsPage = () => {
                   )}
                 </Button>
                 <Button
-                  className="mr-2 min-w-[100px]" 
+                  className={`mr-2 min-w-[100px] ${
+                    interviewDetails.InterviewQuality === 1 ||
+                    loadingButton !== null
+                      ? "cursor-not-allowed"
+                      : ""
+                  }`}
                   onClick={() => updateInterviewQuality(1, "approve")}
                   disabled={
                     interviewDetails.InterviewQuality === 1 ||
@@ -188,7 +256,12 @@ const InterviewDetailsPage = () => {
                   )}
                 </Button>
                 <Button
-                  className="mr-2 min-w-[100px]" 
+                  className={`mr-2 min-w-[100px] ${
+                    interviewDetails.InterviewQuality === 2 ||
+                    loadingButton !== null
+                      ? "cursor-not-allowed"
+                      : ""
+                  }`}
                   onClick={() => updateInterviewQuality(2, "unverify")}
                   disabled={
                     interviewDetails.InterviewQuality === 2 ||
@@ -202,7 +275,12 @@ const InterviewDetailsPage = () => {
                   )}
                 </Button>
                 <Button
-                  className="min-w-[100px]" 
+                  className={`min-w-[100px] ${
+                    interviewDetails.InterviewQuality === 3 ||
+                    loadingButton !== null
+                      ? "cursor-not-allowed"
+                      : ""
+                  }`}
                   onClick={() => updateInterviewQuality(3, "reject")}
                   disabled={
                     interviewDetails.InterviewQuality === 3 ||
@@ -288,7 +366,13 @@ const InterviewDetailsPage = () => {
             </div>
           </>
         )}
-        <AnswersTable surveyId={surveyId} interviewId={interviewId} />
+        <AnswersTable
+          surveyId={surveyId}
+          interviewId={interviewId}
+          downloadedFiles={downloadedFiles}
+          renderAnswerWithImages={renderAnswerWithImages}
+          onLoaded={handleAnswersLoaded}
+        />
         <Audioplayback time={formatDuration(interviewDetails.ActiveSeconds)} />
       </div>
       <Toaster

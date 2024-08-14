@@ -5,7 +5,13 @@ import Error from "@/components/component/Error";
 import { Input } from "@/components/ui/input";
 import { UpdateIcon } from "@radix-ui/react-icons";
 
-const AnswersTable = ({ surveyId, interviewId }) => {
+const AnswersTable = ({
+  surveyId,
+  interviewId,
+  downloadedFiles,
+  renderAnswerWithImages,
+  onLoaded,
+}) => {
   const [groupedAnswers, setGroupedAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -42,12 +48,13 @@ const AnswersTable = ({ surveyId, interviewId }) => {
           setError("Error fetching answers");
         } finally {
           setLoading(false);
+          onLoaded(); // Notify that loading is complete
         }
       };
 
       fetchAnswers();
     }
-  }, [surveyId, interviewId]);
+  }, [surveyId, interviewId, onLoaded]);
 
   const handleSearch = (e) => setSearch(e.target.value);
 
@@ -58,12 +65,12 @@ const AnswersTable = ({ surveyId, interviewId }) => {
     );
   }, [search, groupedAnswers]);
 
-  if (loading) return (
-  <div className="flex items-center justify-center h-screen">
-  <UpdateIcon className="animate-spin h-10 w-10 text-blue-500" />
-  </div>
-
-  )
+  if (loading)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <UpdateIcon className="animate-spin h-10 w-10 text-blue-500" />
+      </div>
+    );
   if (error) return <Error error={error} />;
 
   return (
@@ -82,9 +89,11 @@ const AnswersTable = ({ surveyId, interviewId }) => {
               <div className="text-sm font-medium text-muted-foreground mt-5">
                 Q: {questionText}
               </div>
-
               <div className="text-base font-medium">
-                A: {groupedAnswers[questionText].join(", ")}
+                A:{" "}
+                {groupedAnswers[questionText].map((answer) =>
+                  renderAnswerWithImages(answer)
+                )}
               </div>
             </React.Fragment>
           ))}

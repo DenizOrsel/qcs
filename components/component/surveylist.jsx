@@ -31,8 +31,13 @@ export default function Surveylist() {
             "X-Custom-Url": apiBaseUrl,
           },
         });
-        setSurveys(response.data);
-        console.log(response.data);
+        if (response.data.length === 0) {
+          setError(
+            "There are no available surveys to check. It may be due to repository warming up. Please check back in 10 minutes."
+          );
+        } else {
+          setSurveys(response.data);
+        }
       } catch (err) {
         console.error("Error fetching surveys:", err);
         setError("Error fetching surveys");
@@ -59,14 +64,36 @@ export default function Surveylist() {
           survey.SurveyName.toLowerCase().includes(searchTerm.toLowerCase())
         )
         .sort((a, b) => {
-          const aValue =
-            typeof a[sort.key] === "number"
-              ? a[sort.key]
-              : a.InterviewQualityCounts?.[sort.key];
-          const bValue =
-            typeof b[sort.key] === "number"
-              ? b[sort.key]
-              : b.InterviewQualityCounts?.[sort.key];
+          let aValue, bValue;
+
+          if (sort.key === 4) {
+            // Calculate Task Completion percentage for sorting
+            aValue =
+              (1 -
+                (a.InterviewQualityCounts[0] + a.InterviewQualityCounts[2]) /
+                  (a.InterviewQualityCounts[0] +
+                    a.InterviewQualityCounts[1] +
+                    a.InterviewQualityCounts[2] +
+                    a.InterviewQualityCounts[3])) *
+              100;
+
+            bValue =
+              (1 -
+                (b.InterviewQualityCounts[0] + b.InterviewQualityCounts[2]) /
+                  (b.InterviewQualityCounts[0] +
+                    b.InterviewQualityCounts[1] +
+                    b.InterviewQualityCounts[2] +
+                    b.InterviewQualityCounts[3])) *
+              100;
+          } else if (typeof sort.key === "number") {
+            // Sorting other numeric columns
+            aValue = a.InterviewQualityCounts[sort.key];
+            bValue = b.InterviewQualityCounts[sort.key];
+          } else {
+            // Default sorting for strings and other properties
+            aValue = a[sort.key];
+            bValue = b[sort.key];
+          }
 
           if (sort.order === "asc") {
             return aValue > bValue ? 1 : -1;
@@ -76,6 +103,7 @@ export default function Surveylist() {
         }),
     [searchTerm, sort, surveys]
   );
+
 
   const handleRowClick = (surveyId) => {
     router.push(`/dashboard/${surveyId}`);
@@ -171,27 +199,63 @@ export default function Surveylist() {
                     </span>
                   )}
                 </TableHead>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => handleSort(4)}
+                >
+                  Task Completion
+                  {sort.key === 4 && (
+                    <span className="ml-1">
+                      {sort.order === "asc" ? "\u2191" : "\u2193"}
+                    </span>
+                  )}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredAndSortedSurveys.map((survey) => (
-                <TableRow
-                  key={survey.SurveyId}
-                  onClick={() => handleRowClick(survey.SurveyId)}
-                  className="cursor-pointer"
-                >
-                  <TableCell>{survey.SurveyName}</TableCell>
-                  <TableCell>
-                    {survey.SurveyState === 0 ? "Under Construction" : ""}
-                    {survey.SurveyState === 1 ? "Started" : ""}
-                    {survey.SurveyState === 3 ? "Stopped" : ""}
-                  </TableCell>
-                  <TableCell>{survey.InterviewQualityCounts[0]}</TableCell>
-                  <TableCell>{survey.InterviewQualityCounts[1]}</TableCell>
-                  <TableCell>{survey.InterviewQualityCounts[2]}</TableCell>
-                  <TableCell>{survey.InterviewQualityCounts[3]}</TableCell>
-                </TableRow>
-              ))}
+              {filteredAndSortedSurveys.map((survey) => {
+                const totalQualityCounts =
+                  survey.InterviewQualityCounts[0] +
+                  survey.InterviewQualityCounts[1] +
+                  survey.InterviewQualityCounts[2] +
+                  survey.InterviewQualityCounts[3];
+
+                const isClickable = totalQualityCounts !== 0;
+
+                const taskCompletion = isClickable
+                  ? (
+                      (1 -
+                        (survey.InterviewQualityCounts[0] +
+                          survey.InterviewQualityCounts[2]) /
+                          totalQualityCounts) *
+                      100
+                    ).toFixed(1)
+                  : 0;
+
+                return (
+                  <TableRow
+                    key={survey.SurveyId}
+                    onClick={
+                      isClickable ? () => handleRowClick(survey.SurveyId) : null
+                    }
+                    className={`cursor-pointer ${
+                      !isClickable ? "cursor-not-allowed" : ""
+                    }`}
+                  >
+                    <TableCell>{survey.SurveyName}</TableCell>
+                    <TableCell>
+                      {survey.SurveyState === 0 ? "Under Construction" : ""}
+                      {survey.SurveyState === 1 ? "Started" : ""}
+                      {survey.SurveyState === 3 ? "Stopped" : ""}
+                    </TableCell>
+                    <TableCell>{survey.InterviewQualityCounts[0]}</TableCell>
+                    <TableCell>{survey.InterviewQualityCounts[1]}</TableCell>
+                    <TableCell>{survey.InterviewQualityCounts[2]}</TableCell>
+                    <TableCell>{survey.InterviewQualityCounts[3]}</TableCell>
+                    <TableCell>{taskCompletion}%</TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         )}
