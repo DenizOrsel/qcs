@@ -1,51 +1,111 @@
+import React, { useState, useEffect, useRef } from "react";
+import ReactHowler from "react-howler";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 
 export default function Audioplayback({ audioSrc }) {
+  const [playing, setPlaying] = useState(false);
+  const [seek, setSeek] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1.0);
+  const howlerRef = useRef(null);
+  const [muted, setMuted] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (howlerRef.current) {
+        setSeek(howlerRef.current.seek());
+        setDuration(howlerRef.current.duration());
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const togglePlayPause = () => {
+    setPlaying(!playing);
+  };
+
+  const handleSliderChange = (value) => {
+    if (howlerRef.current) {
+      howlerRef.current.seek(value);
+      setSeek(value);
+    }
+  };
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60) || 0;
+    const secs = Math.floor(seconds % 60) || 0;
+    return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+  };
+
+  const handleOnEnd = () => {
+    setPlaying(false);
+    setSeek(0);
+  };
+
+  const toggleMute = () => {
+    setMuted(!muted);
+    howlerRef.current.mute(!muted);
+  };
 
   return (
     <div className="fixed inset-x-0 bottom-0 bg-background border-t border-muted shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1),0_-2px_4px_-2px_rgba(0,0,0,0.1)] flex justify-center items-center">
       <div className="container px-4 py-3 flex items-center gap-4">
-        {/* Control Buttons */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="w-8 h-8">
-            <RewindIcon className="w-5 h-5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="w-8 h-8">
-            <PlayIcon className="w-5 h-5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="w-8 h-8">
-            <RewindIcon className="w-5 h-5 rotate-180" />
-          </Button>
-          <Button variant="ghost" size="icon" className="w-8 h-8">
+        {/* Play/Pause Button */}
+
+        <Button variant="ghost" size="icon" onClick={togglePlayPause}>
+          {playing ? (
             <CircleStopIcon className="w-5 h-5" />
-          </Button>
-        </div>
+          ) : (
+            <PlayIcon className="w-5 h-5" />
+          )}
+        </Button>
 
         {/* Slider */}
         <div className="flex-1 mx-4 mt-3">
           <Slider
-            className="w-full [&>span:first-child]:h-1 [&>span:first-child]:bg-primary/30 [&_[role=slider]]:bg-primary [&_[role=slider]]:w-3 [&_[role=slider]]:h-3 [&_[role=slider]]:border-0 [&>span:first-child_span]:bg-primary [&_[role=slider]:focus-visible]:ring-0 [&_[role=slider]:focus-visible]:ring-offset-0 [&_[role=slider]:focus-visible]:scale-105 [&_[role=slider]:focus-visible]:transition-transform"
-            defaultValue={[0]}
+            className="w-full cursor-grab [&>span:first-child]:h-1 [&>span:first-child]:bg-primary/30 [&_[role=slider]]:bg-primary [&_[role=slider]]:w-3 [&_[role=slider]]:h-3 [&_[role=slider]]:border-0 [&>span:first-child_span]:bg-primary [&_[role=slider]:focus-visible]:ring-0 [&_[role=slider]:focus-visible]:ring-offset-0 [&_[role=slider]:focus-visible]:scale-105 [&_[role=slider]:focus-visible]:transition-transform"
+            value={[seek]}
+            max={duration}
+            onValueChange={([value]) => handleSliderChange(value)}
           />
         </div>
 
         {/* Duration and Volume Control */}
         <div className="flex items-center gap-2">
           <div className="text-sm text-muted-foreground mt-2">
-            0:00 / 0 seconds
+            {formatTime(seek)} / {formatTime(duration)}
           </div>
-          <Button variant="ghost" size="icon" className="w-8 h-8 mt-3">
-            <Volume2Icon className="w-5 h-5" />
+          <Button
+            variant="ghost"
+            size="icon"
+            className="w-8 h-8 mt-3"
+            onClick={toggleMute}
+          >
+            {muted ? (
+              <VolumeXIcon className="w-7 h-7 mt-2 ml-2" />
+            ) : (
+              <Volume2Icon className="w-5 h-5" />
+            )}
           </Button>
+          <Slider
+            className="w-24 mt-3 cursor-grab"
+            value={[volume]}
+            max={1}
+            step={0.01}
+            onValueChange={([value]) => setVolume(value)}
+          />
         </div>
       </div>
-      {audioSrc && (
-        <audio controls>
-          <source src={audioSrc} type="audio/mp3" />
-          Your browser does not support the audio element.
-        </audio>
-      )}
+      <ReactHowler
+        src={audioSrc}
+        playing={playing}
+        volume={volume}
+        ref={howlerRef}
+        onEnd={handleOnEnd}
+        muted={muted}
+      />
     </div>
   );
 }
@@ -89,22 +149,26 @@ function PlayIcon(props) {
   );
 }
 
-function RewindIcon(props) {
+function VolumeXIcon(props) {
   return (
     <svg
       {...props}
-      xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="1"
       strokeLinecap="round"
       strokeLinejoin="round"
+      xmlns="http://www.w3.org/2000/svg"
     >
-      <polygon points="11 19 2 12 11 5 11 19" />
-      <polygon points="22 19 13 12 22 5 22 19" />
+      <path
+        d="M7.72361 1.05279C7.893 1.13749 8 1.31062 8 1.5V13.5C8 13.6894 7.893 13.8625 7.72361 13.9472C7.55421 14.0319 7.35151 14.0136 7.2 13.9L3.33333 11H1.5C0.671573 11 0 10.3284 0 9.5V5.5C0 4.67158 0.671573 4 1.5 4H3.33333L7.2 1.1C7.35151 0.986371 7.55421 0.968093 7.72361 1.05279ZM7 2.5L3.8 4.9C3.71345 4.96491 3.60819 5 3.5 5H1.5C1.22386 5 1 5.22386 1 5.5V9.5C1 9.77614 1.22386 10 1.5 10H3.5C3.60819 10 3.71345 10.0351 3.8 10.1L7 12.5V2.5ZM14.8536 5.14645C15.0488 5.34171 15.0488 5.65829 14.8536 5.85355L13.2071 7.5L14.8536 9.14645C15.0488 9.34171 15.0488 9.65829 14.8536 9.85355C14.6583 10.0488 14.3417 10.0488 14.1464 9.85355L12.5 8.20711L10.8536 9.85355C10.6583 10.0488 10.3417 10.0488 10.1464 9.85355C9.95118 9.65829 9.95118 9.34171 10.1464 9.14645L11.7929 7.5L10.1464 5.85355C9.95118 5.65829 9.95118 5.34171 10.1464 5.14645C10.3417 4.95118 10.6583 4.95118 10.8536 5.14645L12.5 6.79289L14.1464 5.14645C14.3417 4.95118 14.6583 4.95118 14.8536 5.14645Z"
+        fill="currentColor"
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+      ></path>
     </svg>
   );
 }
@@ -129,3 +193,4 @@ function Volume2Icon(props) {
     </svg>
   );
 }
+

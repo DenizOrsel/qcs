@@ -383,15 +383,18 @@ const renderAnswerWithImages = (answer) => {
           onLoaded={handleAnswersLoaded}
         />
         {audioFile && (
-          <Audioplayback audioSrc={`data:audio/mpeg;base64,${audioFile.content}`}
+          <Audioplayback
+            audioSrc={`data:audio/mpeg;base64,${audioFile.content}`}
           />
         )}
       </div>
-      <Toaster
-        message="Interview status is updated"
-        visible={toasterVisible}
-        onClose={() => setToasterVisible(false)}
-      />
+      {toasterVisible && (
+        <Toaster
+          message="Interview status is updated"
+          visible={toasterVisible}
+          onClose={() => setToasterVisible(false)}
+        />
+      )}
     </div>
   );
 };

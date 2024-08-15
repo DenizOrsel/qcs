@@ -18,7 +18,7 @@ export default function DarkModeToggle() {
   }, []);
 
   return (
-    <div className="flex justify-end items-end fixed right-0 bottom-0 mr-4 mb-4 z-40">
+    <div className="flex justify-end items-end absolute right-12 top-2 mr-4 mb-4 z-40">
       <button
         onClick={toggleDarkMode}
         className="flex items-center justify-center w-12 h-6 p-1 bg-gray-200 rounded-full dark:bg-gray-600 focus:outline-none"
