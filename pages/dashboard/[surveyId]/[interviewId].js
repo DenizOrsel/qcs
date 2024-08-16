@@ -77,8 +77,7 @@ const InterviewDetailsPage = () => {
       setAudioFile(audioFile);
 
     } catch (error) {
-      console.error("Error downloading package:", error);
-      alert("Failed to download package.");
+      console.log("Warning there is no stream available for the record:", error);
     }
   };
 
@@ -384,7 +383,7 @@ const renderAnswerWithImages = (answer) => {
         />
         {audioFile && (
           <Audioplayback
-            audioSrc={`data:audio/mpeg;base64,${audioFile.content}`}
+            audioSrc={`data:audio/mp3;base64,${audioFile.content}`}
           />
         )}
       </div>
