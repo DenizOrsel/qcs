@@ -72,7 +72,7 @@ const InterviewDetailsPage = () => {
 
       const audioFile = response.data.files.find(
         (file) =>
-          file.filename.includes("silent") && file.filename.endsWith(".mpeg4")
+          file.filename.includes("silent") && file.filename.endsWith(".mp3")
       );
       setAudioFile(audioFile);
 

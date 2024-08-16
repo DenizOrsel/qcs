@@ -1,5 +1,9 @@
 import axios from "axios";
 import AdmZip from "adm-zip";
+import ffmpeg from "fluent-ffmpeg";
+import ffmpegPath from "ffmpeg-static";
+import { PassThrough } from "stream";
+import { Readable } from "stream";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -39,8 +43,8 @@ export default async function handler(req, res) {
 
     let activityStatus = 0;
     let downloadUrl = "";
-    const maxRetries = 20; // Maximum number of retries
-    const retryInterval = 5000; // Poll every 5 seconds
+    const maxRetries = 20;
+    const retryInterval = 5000;
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       const activityResponse = await axios.get(
@@ -77,21 +81,78 @@ export default async function handler(req, res) {
     const zip = new AdmZip(zipResponse.data);
     const zipEntries = zip.getEntries();
 
-    const files = zipEntries
-      .filter(
-        (entry) =>
-          entry.entryName.endsWith(".jpg") || entry.entryName.endsWith(".mpeg4")
-      )
-      .map((entry) => {
-        return {
-          filename: entry.entryName,
-          content: entry.getData().toString("base64"),
-        };
+    const mpegFileEntry = zipEntries.find((entry) =>
+      entry.entryName.endsWith(".mpeg4")
+    );
+
+    const jpgEntries = zipEntries.filter((entry) =>
+      entry.entryName.endsWith(".jpg")
+    );
+
+    if (!mpegFileEntry) {
+      return res
+        .status(404)
+        .json({ message: "MPEG4 file not found in the package" });
+    }
+
+    const mpegData = mpegFileEntry.getData();
+
+    const mpegStream = new Readable();
+    mpegStream._read = () => {};
+    mpegStream.push(mpegData);
+    mpegStream.push(null);
+
+    ffmpeg.setFfmpegPath(ffmpegPath);
+
+    const convertedStream = new PassThrough();
+
+    const files = jpgEntries.map((entry) => ({
+      filename: entry.entryName,
+      content: entry.getData().toString("base64"),
+    }));
+
+    let audioFile = "";
+
+    return new Promise((resolve, reject) => {
+      ffmpeg(mpegStream)
+        .inputFormat("mp4")
+        .outputFormat("mp3")
+        .on("end", () => {
+          console.log("Conversion finished");
+          files.push({
+            filename: mpegFileEntry.entryName.replace(".mpeg4", ".mp3"),
+            content: audioFile,
+          });
+          if (!res.headersSent) {
+            res.status(200).json({ files });
+          }
+          resolve(); // Resolve the promise once the response is sent
+        })
+        .on("error", (err) => {
+          console.error("FFmpeg error:", err);
+          if (!res.headersSent) {
+            res.status(500).json({ message: "Error during conversion" });
+          }
+          reject(err); // Reject the promise on error
+        })
+        .pipe(convertedStream);
+
+      convertedStream.on("data", (chunk) => {
+        audioFile += chunk.toString("base64");
       });
 
-    return res.status(200).json({ files });
+      convertedStream.on("error", (err) => {
+        console.error("Streaming error:", err);
+        if (!res.headersSent) {
+          res.status(500).json({ message: "Error during streaming" });
+        }
+        reject(err); // Reject the promise on stream error
+      });
+    });
   } catch (error) {
     console.error("Error processing download package:", error);
-    return res.status(500).json({ message: "Internal server error" });
+    if (!res.headersSent) {
+      return res.status(500).json({ message: "Internal server error" });
+    }
   }
 }
