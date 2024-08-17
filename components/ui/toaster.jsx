@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Card } from "@/components/ui/card";
+import { Card } from "@/components/ui/Card";
 
 const Toaster = ({ message, visible, onClose }) => {
   useEffect(() => {
