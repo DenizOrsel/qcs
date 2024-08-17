@@ -38,9 +38,20 @@ export default function Qcontrol() {
     return str.replace(/^0+/, "") || "0";
   };
 
-  const handleRowClick = (interviewId) => {
+  const averageActiveSeconds = useMemo(() => {
+    if (interviews.length === 0) return 0;
+    const totalActiveSeconds = interviews.reduce(
+      (sum, interview) => sum + interview.ActiveSeconds,
+      0
+    );
+    return Math.round(totalActiveSeconds / interviews.length);
+  }, [interviews]);
+
+  const handleRowClick = (interviewId, averageActiveSeconds) => {
     const formattedInterviewId = removeLeadingZeros(interviewId);
-    router.push(`/dashboard/${surveyId}/${formattedInterviewId}`);
+    router.push(
+      `/dashboard/${surveyId}/${formattedInterviewId}?xlmns=${averageActiveSeconds}`
+    );
   };
 
   useEffect(() => {
@@ -215,7 +226,7 @@ export default function Qcontrol() {
           {filteredAndSortedInterviews.map((interview) => (
             <TableRow
               key={interview.Id}
-              onClick={() => handleRowClick(interview.Id)}
+              onClick={() => handleRowClick(interview.Id, averageActiveSeconds)}
               className="cursor-pointer"
             >
               <TableCell className="font-medium">

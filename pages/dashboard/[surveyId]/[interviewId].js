@@ -27,6 +27,8 @@ const InterviewDetailsPage = () => {
   const [answersLoaded, setAnswersLoaded] = useState(false);
   const [audioFile, setAudioFile] = useState(null);
   const [loadingAssets, setLoadingAssets] = useState(false);
+  const urlParams = new URLSearchParams(window.location.search);
+  const xlmns = urlParams.get('xlmns');
 
 
   useEffect(() => {
@@ -314,7 +316,13 @@ const renderAnswerWithImages = (answer) => {
                   Duration
                 </div>
                 <div className="text-base font-medium">
-                  <FormatDuration seconds={interviewDetails.ActiveSeconds} />
+                  <FormatDuration seconds={interviewDetails.ActiveSeconds} />{" "}
+                  <span className="font-extralight ml-2">
+                    Survey Average:{" "}
+                    <FormatDuration
+                      seconds={xlmns}
+                    />
+                  </span>
                 </div>
               </div>
               <div>
@@ -388,10 +396,10 @@ const renderAnswerWithImages = (answer) => {
         />
       )}
       {loadingAssets && (
-          <Card className="fixed bottom-4 right-4 flex items-center p-2 gap-2 bg-amber-400 dark:text-black">
-            <UpdateIcon className="animate-spin" />
-            <p className="font-semibold">Loading assets...</p>
-          </Card>
+        <Card className="fixed bottom-4 right-4 flex items-center p-2 gap-2 bg-amber-400 dark:text-black">
+          <UpdateIcon className="animate-spin" />
+          <p className="font-semibold">Loading assets...</p>
+        </Card>
       )}
     </div>
   );
