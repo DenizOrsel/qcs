@@ -1,4 +1,6 @@
 import axios from "axios";
+import sql from "mssql";
+import { getDbConnection } from "@/lib/db";
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
@@ -21,7 +23,48 @@ export default async function handler(req, res) {
         }
       );
 
-      res.status(200).json(qualityResponse.data);
+      const interviewData = qualityResponse.data;
+
+      const interviewIds = interviewData.map((i) =>
+        parseInt(i.Id, 10).toString()
+      );
+      const interviewIdsString = interviewIds.map((id) => `'${id}'`).join(", ");
+
+      const pool = await getDbConnection();
+
+      const request = pool.request();
+      request.input("nfieldSurveyId", sql.UniqueIdentifier, surveyId);
+
+      const sqlQuery = `
+  SELECT 
+    i.NfieldInterviewId, 
+    i.ActiveSeconds, 
+    i.StartTime, 
+    i.EndTime 
+  FROM dbo.Interviews i
+  JOIN dbo.Surveys s ON i.SurveyId = s.Id
+  WHERE s.NfieldSurveyId = @nfieldSurveyId
+    AND i.NfieldInterviewId IN (${interviewIdsString})
+  ORDER BY i.NfieldInterviewId ASC
+`;
+
+      const result = await request.query(sqlQuery);
+      const interviewsData = result.recordset;
+
+      // Merge the SQL data with the Nfield API data
+      const mergedData = interviewData.map((interview) => {
+        const match = interviewsData.find(
+          (i) => i.NfieldInterviewId === parseInt(interview.Id, 10).toString()
+        );
+        return {
+          ...interview,
+          ActiveSeconds: match?.ActiveSeconds || null,
+          StartTime: match?.StartTime || null,
+          EndTime: match?.EndTime || null,
+        };
+      });
+
+      res.status(200).json(mergedData);
     } catch (error) {
       console.error("Error fetching interview quality data:", error);
       res.status(500).json({ error: "Error fetching interview quality data" });

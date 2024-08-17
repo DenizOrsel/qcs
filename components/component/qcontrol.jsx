@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import axios from "axios";
 import Error from "@/components/component/Error";
 import Loader from "@/components/ui/Loader";
+import FormatDuration from "../FormatDuration";
 
 export default function Qcontrol() {
   const router = useRouter();
@@ -85,7 +86,6 @@ export default function Qcontrol() {
     }
   };
 
-
   const filteredAndSortedInterviews = useMemo(
     () =>
       interviews
@@ -97,7 +97,16 @@ export default function Qcontrol() {
               .toLowerCase()
               .includes(searchValue) ||
             (interview.OfficeId ?? "").toLowerCase().includes(searchValue) ||
-            (interview.InterviewerId ?? "").toLowerCase().includes(searchValue)
+            (interview.InterviewerId ?? "")
+              .toLowerCase()
+              .includes(searchValue) ||
+            (interview.ActiveSeconds ?? "").toString().includes(searchValue) ||
+            (new Date(interview.StartTime).toLocaleString() ?? "")
+              .toLowerCase()
+              .includes(searchValue) ||
+            (new Date(interview.EndTime).toLocaleString() ?? "")
+              .toLowerCase()
+              .includes(searchValue)
           );
         })
         .sort((a, b) => {
@@ -167,6 +176,39 @@ export default function Qcontrol() {
                 </span>
               )}
             </TableHead>
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("ActiveSeconds")}
+            >
+              Duration
+              {sort.key === "ActiveSeconds" && (
+                <span className="ml-1">
+                  {sort.order === "asc" ? "\u2191" : "\u2193"}
+                </span>
+              )}
+            </TableHead>
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("StartTime")}
+            >
+              Start Time
+              {sort.key === "StartTime" && (
+                <span className="ml-1">
+                  {sort.order === "asc" ? "\u2191" : "\u2193"}
+                </span>
+              )}
+            </TableHead>
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("EndTime")}
+            >
+              End Time
+              {sort.key === "EndTime" && (
+                <span className="ml-1">
+                  {sort.order === "asc" ? "\u2191" : "\u2193"}
+                </span>
+              )}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -202,6 +244,15 @@ export default function Qcontrol() {
               </TableCell>
               <TableCell>{interview.InterviewerId}</TableCell>
               <TableCell>{interview.OfficeId}</TableCell>
+              <TableCell>
+                <FormatDuration seconds={interview.ActiveSeconds} />
+              </TableCell>
+              <TableCell>
+                {new Date(interview.StartTime).toLocaleString()}
+              </TableCell>
+              <TableCell>
+                {new Date(interview.EndTime).toLocaleString()}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

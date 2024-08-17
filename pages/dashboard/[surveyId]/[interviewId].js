@@ -13,6 +13,7 @@ import Audioplayback from "@/components/component/Audioplayback";
 import { UpdateIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
 import { Card } from "@/components/ui/Card";
+import FormatDuration from "@/components/FormatDuration";
 
 const InterviewDetailsPage = () => {
   const router = useRouter();
@@ -109,18 +110,6 @@ const InterviewDetailsPage = () => {
         return "Rejected";
       default:
         return "";
-    }
-  };
-
-  const formatDuration = (seconds) => {
-    if (seconds < 60) {
-      return `${seconds} seconds`;
-    } else {
-      const minutes = Math.floor(seconds / 60);
-      const remainingSeconds = seconds % 60;
-      return `${minutes} minute${
-        minutes > 1 ? "s" : ""
-      } ${remainingSeconds} second${remainingSeconds > 1 ? "s" : ""}`;
     }
   };
 
@@ -325,7 +314,7 @@ const renderAnswerWithImages = (answer) => {
                   Duration
                 </div>
                 <div className="text-base font-medium">
-                  {formatDuration(interviewDetails.ActiveSeconds)}
+                  <FormatDuration seconds={interviewDetails.ActiveSeconds} />
                 </div>
               </div>
               <div>
