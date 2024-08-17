@@ -83,6 +83,12 @@ export default async function handler(req, res) {
     const zip = new AdmZip(zipResponse.data);
     const zipEntries = zip.getEntries();
 
+        if (zipEntries.length < 7) {
+          return res
+            .status(404)
+            .json({ message: "There is nothing to stream" });
+        }
+
     const mpegFileEntry = zipEntries.find((entry) =>
       entry.entryName.endsWith(".mpeg4") && entry.entryName.includes("silent")
     );
