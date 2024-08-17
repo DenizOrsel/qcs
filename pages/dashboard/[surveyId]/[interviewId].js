@@ -17,7 +17,7 @@ import FormatDuration from "@/components/FormatDuration";
 
 const InterviewDetailsPage = () => {
   const router = useRouter();
-  const { surveyId, interviewId } = router.query;
+  const { surveyId, interviewId, xlmns } = router.query;
   const [interviewDetails, setInterviewDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingButton, setLoadingButton] = useState(null);
@@ -27,9 +27,6 @@ const InterviewDetailsPage = () => {
   const [answersLoaded, setAnswersLoaded] = useState(false);
   const [audioFile, setAudioFile] = useState(null);
   const [loadingAssets, setLoadingAssets] = useState(false);
-  const urlParams = new URLSearchParams(window.location.search);
-  const xlmns = urlParams.get('xlmns');
-
 
   useEffect(() => {
     if (interviewId && surveyId) {
@@ -84,7 +81,7 @@ const InterviewDetailsPage = () => {
       setAudioFile(audioFile);
 
     } catch (error) {
-      console.log("Warning there is no stream available for the record:", error);
+      console.log("Info: There is no stream available for the record.");
     } finally {
       setLoadingAssets(false);
     }
