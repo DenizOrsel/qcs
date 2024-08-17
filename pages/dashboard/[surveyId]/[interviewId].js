@@ -399,9 +399,9 @@ const renderAnswerWithImages = (answer) => {
         />
       )}
       {loadingAssets && (
-          <Card className="fixed bottom-4 right-4 flex items-center p-2 gap-2">
+          <Card className="fixed bottom-4 right-4 flex items-center p-2 gap-2 bg-amber-400 dark:text-black">
             <UpdateIcon className="animate-spin" />
-            <p className="font-bold">Loading assets.</p>
+            <p className="font-semibold">Loading assets...</p>
           </Card>
       )}
     </div>
