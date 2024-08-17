@@ -383,7 +383,7 @@ const renderAnswerWithImages = (answer) => {
         />
         {audioFile && (
           <Audioplayback
-            audioSrc={`data:audio/mp3;base64,${audioFile.content}`}
+            audioSrc={audioFile.content}
           />
         )}
       </div>

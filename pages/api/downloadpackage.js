@@ -1,9 +1,11 @@
 import axios from "axios";
 import AdmZip from "adm-zip";
-import ffmpeg from "fluent-ffmpeg";
-import ffmpegPath from "ffmpeg-static";
-import { PassThrough } from "stream";
+import StreamPot from "@streampot/client";
 import { Readable } from "stream";
+
+const streampot = new StreamPot({
+  secret: process.env.STREAMING_SERVER,
+});
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -82,73 +84,39 @@ export default async function handler(req, res) {
     const zipEntries = zip.getEntries();
 
     const mpegFileEntry = zipEntries.find((entry) =>
-      entry.entryName.endsWith(".mpeg4")
+      entry.entryName.endsWith(".mpeg4") && entry.entryName.includes("silent")
     );
 
     const jpgEntries = zipEntries.filter((entry) =>
       entry.entryName.endsWith(".jpg")
     );
 
-    if (!mpegFileEntry) {
-      return res
-        .status(404)
-        .json({ message: "MPEG4 file not found in the package" });
-    }
-
     const mpegData = mpegFileEntry.getData();
-
     const mpegStream = new Readable();
     mpegStream._read = () => {};
     mpegStream.push(mpegData);
     mpegStream.push(null);
 
-    ffmpeg.setFfmpegPath(ffmpegPath);
+    const clip = await streampot
+      .input("data:video/mp4;base64," + mpegData.toString("base64"))
+      .output("silent.mp3")
+      .runAndWait();
 
-    const convertedStream = new PassThrough();
+    const audioFile = clip.outputs["silent.mp3"];
 
     const files = jpgEntries.map((entry) => ({
       filename: entry.entryName,
       content: entry.getData().toString("base64"),
     }));
 
-    let audioFile = "";
-
-    return new Promise((resolve, reject) => {
-      ffmpeg(mpegStream)
-        .inputFormat("mp4")
-        .outputFormat("mp3")
-        .on("end", () => {
-          console.log("Conversion finished");
-          files.push({
-            filename: mpegFileEntry.entryName.replace(".mpeg4", ".mp3"),
-            content: audioFile,
-          });
-          if (!res.headersSent) {
-            res.status(200).json({ files });
-          }
-          resolve(); // Resolve the promise once the response is sent
-        })
-        .on("error", (err) => {
-          console.error("FFmpeg error:", err);
-          if (!res.headersSent) {
-            res.status(500).json({ message: "Error during conversion" });
-          }
-          reject(err); // Reject the promise on error
-        })
-        .pipe(convertedStream);
-
-      convertedStream.on("data", (chunk) => {
-        audioFile += chunk.toString("base64");
-      });
-
-      convertedStream.on("error", (err) => {
-        console.error("Streaming error:", err);
-        if (!res.headersSent) {
-          res.status(500).json({ message: "Error during streaming" });
-        }
-        reject(err); // Reject the promise on stream error
-      });
+    
+    files.push({
+      filename: "silent.mp3",
+      content: audioFile,
     });
+
+
+    res.status(200).json({ files });
   } catch (error) {
     console.error("Error processing download package:", error);
     if (!res.headersSent) {
