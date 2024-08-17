@@ -12,6 +12,7 @@ import BackButton from "@/components/ui/backButton";
 import Audioplayback from "@/components/component/Audioplayback";
 import { UpdateIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
+import { Card } from "@/components/ui/Card";
 
 const InterviewDetailsPage = () => {
   const router = useRouter();
@@ -24,6 +25,8 @@ const InterviewDetailsPage = () => {
   const [downloadedFiles, setDownloadedFiles] = useState([]);
   const [answersLoaded, setAnswersLoaded] = useState(false);
   const [audioFile, setAudioFile] = useState(null);
+  const [loadingAssets, setLoadingAssets] = useState(false);
+
 
   useEffect(() => {
     if (interviewId && surveyId) {
@@ -53,6 +56,7 @@ const InterviewDetailsPage = () => {
   }, [interviewId, surveyId]);
 
   const downloadPackage = async () => {
+    setLoadingAssets(true);
     try {
       const token = sessionStorage.getItem("token");
       const apiBaseUrl = localStorage.getItem("apiBaseUrl");
@@ -78,6 +82,8 @@ const InterviewDetailsPage = () => {
 
     } catch (error) {
       console.log("Warning there is no stream available for the record:", error);
+    } finally {
+      setLoadingAssets(false);
     }
   };
 
@@ -167,6 +173,8 @@ const InterviewDetailsPage = () => {
       setLoadingButton(null);
     }
   };
+
+  
 
   if (loading) return <Loader />;
   if (error) return <Error error={error} />;
@@ -381,11 +389,7 @@ const renderAnswerWithImages = (answer) => {
           renderAnswerWithImages={renderAnswerWithImages}
           onLoaded={handleAnswersLoaded}
         />
-        {audioFile && (
-          <Audioplayback
-            audioSrc={audioFile.content}
-          />
-        )}
+        {audioFile && <Audioplayback audioSrc={audioFile.content} />}
       </div>
       {toasterVisible && (
         <Toaster
@@ -393,6 +397,12 @@ const renderAnswerWithImages = (answer) => {
           visible={toasterVisible}
           onClose={() => setToasterVisible(false)}
         />
+      )}
+      {loadingAssets && (
+          <Card className="fixed bottom-4 right-4 flex items-center p-2 gap-2">
+            <UpdateIcon className="animate-spin" />
+            <p className="font-bold">Loading assets...</p>
+          </Card>
       )}
     </div>
   );
