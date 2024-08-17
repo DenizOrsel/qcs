@@ -14,37 +14,38 @@ export default async function handler(req, res) {
       const request = pool.request();
       request.input("surveyId", sql.UniqueIdentifier, surveyId);
 
-      let query = `
-        SELECT 
-          a.Id AS AnswerId,
-          a.AlphaValue,
-          a.InterviewId,
-          a.NumericValue,
-          a.QuestionId,
-          a.CategoryValueId,
-          q.Text AS QuestionText,
-          i.Id AS InterviewId,
-          i.SampleDataRecordId,
-          i.EndTime,
-          i.StartTime,
-          i.Status,
-          i.Successful,
-          i.ResponseCode,
-          i.ProcessTime,
-          i.LastUpdated,
-          i.NfieldInterviewId,
-          i.ActiveSeconds,
-          i.Final,
-          i.Test,
-          i.CalculatedResult,
-          qc.Value AS CategoryValueText
-        FROM dbo.Answers a
-        JOIN dbo.Questions q ON a.QuestionId = q.Id
-        JOIN dbo.Interviews i ON a.InterviewId = i.SampleDataRecordId
-        JOIN dbo.Surveys s ON q.SurveyId = s.Id
-        LEFT JOIN dbo.QuestionCategories qc ON a.CategoryValueId = qc.Id
-        WHERE s.NfieldSurveyId = @surveyId
-      `;
+let query = `
+  SELECT 
+    a.Id AS AnswerId,
+    a.AlphaValue,
+    a.InterviewId,
+    a.NumericValue,
+    a.QuestionId,
+    a.CategoryValueId,
+    q.Text AS QuestionText,
+    q.NfieldQuestionId, -- Fetch the NfieldQuestionId
+    i.Id AS InterviewId,
+    i.SampleDataRecordId,
+    i.EndTime,
+    i.StartTime,
+    i.Status,
+    i.Successful,
+    i.ResponseCode,
+    i.ProcessTime,
+    i.LastUpdated,
+    i.NfieldInterviewId,
+    i.ActiveSeconds,
+    i.Final,
+    i.Test,
+    i.CalculatedResult,
+    qc.Value AS CategoryValueText
+  FROM dbo.Answers a
+  JOIN dbo.Questions q ON a.QuestionId = q.Id
+  JOIN dbo.Interviews i ON a.InterviewId = i.SampleDataRecordId
+  JOIN dbo.Surveys s ON q.SurveyId = s.Id
+  LEFT JOIN dbo.QuestionCategories qc ON a.CategoryValueId = qc.Id
+  WHERE s.NfieldSurveyId = @surveyId
+`;
 
       if (interviewId) {
         request.input("interviewId", sql.Int, interviewId);
