@@ -1,18 +1,21 @@
 import axios from "axios";
-import sql from "mssql";
-import { getDbConnection } from "@/lib/db"; // Assuming this function exists in your project
+import { getTargetDbConnection } from "@/lib/targetDb";
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
     const { token } = req.headers;
     const apiBaseUrl = req.headers["x-custom-url"];
+    const dbserver = req.headers["x-db-server"];
+    const dbdatabase = req.headers["x-db-database"];
+    const dbuser = req.headers["x-db-user"];
+    const dbpassword = req.headers["x-db-password"];
 
     if (!token) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
+    let pool;
     try {
-      // Step 1: Fetch surveys from the external API
       const surveysResponse = await axios.get(`${apiBaseUrl}Surveys`, {
         headers: {
           Authorization: `Basic ${token}`,
@@ -22,11 +25,14 @@ export default async function handler(req, res) {
 
       const surveys = surveysResponse.data;
 
-      // Step 2: Establish connection to the SQL database
-      const pool = await getDbConnection();
+      pool = await getTargetDbConnection({
+        dbserver,
+        dbdatabase,
+        dbuser,
+        dbpassword,
+      });
       const request = pool.request();
 
-      // Step 3: Query the SQL database to get NfieldSurveyId values
       const sqlQuery = `
         SELECT 
           Id AS SurveyId, 
@@ -37,19 +43,16 @@ export default async function handler(req, res) {
 
       const sqlSurveys = result.recordset;
 
-      // Step 4: Compare SurveyId from API with NfieldSurveyId from SQL and filter matching surveys
       const matchingSurveys = surveys.filter((survey) =>
         sqlSurveys.some(
           (sqlSurvey) => sqlSurvey.NfieldSurveyId === survey.SurveyId
         )
       );
 
-      // Step 5: Further filter to include only non-blueprint basic surveys
       const nonBlueprintBasicSurveys = matchingSurveys.filter(
         (survey) => !survey.IsBlueprint && survey.SurveyType === "Basic"
       );
 
-      // Step 6: Fetch interview quality data for each non-blueprint survey
       const surveysWithAdditionalData = await Promise.all(
         nonBlueprintBasicSurveys.map(async (survey) => {
           try {
@@ -89,7 +92,6 @@ export default async function handler(req, res) {
         })
       );
 
-      // Step 7: Send the response with the processed data
       res.status(200).json(surveysWithAdditionalData);
     } catch (error) {
       console.error(
@@ -97,6 +99,8 @@ export default async function handler(req, res) {
         error.response ? error.response.data : error.message
       );
       res.status(500).json({ error: "Error fetching or processing surveys" });
+    } finally {
+      if (pool) pool.close(); // Ensure connection is closed
     }
   } else {
     res.status(405).json({ error: "Method not allowed" });

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { AppContext } from "@/context/AppContext";
 import axios from "axios";
 import { useRouter } from "next/router";
 import {
@@ -13,9 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { UpdateIcon } from "@radix-ui/react-icons";
 
-export function LoginUI() {
-  const [region, setRegion] = useState("");
-  const [domainname, setDomainname] = useState("");
+export default function LoginUI() {
+  const { setRoles, setDbConfig, region, setRegion, domainname, setDomainname } = useContext(AppContext);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -25,29 +25,31 @@ export function LoginUI() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
+
     try {
       const apiBaseUrl = localStorage.getItem("apiBaseUrl");
       const response = await axios.post(
         "/api/signin",
-        {
-          domainname,
-          username,
-          password,
-        },
-        {
-          headers: {
-            "X-Custom-Url": apiBaseUrl,
-          },
-        }
+        { region, domainname, username, password },
+        { headers: { "X-Custom-Url": apiBaseUrl } }
       );
-      const token = response.data.token;
+
+      const { token, redirect, dbConfig, roles } = response.data;
+
       sessionStorage.setItem("token", token);
       sessionStorage.setItem("domainname", domainname);
       sessionStorage.setItem("username", username);
       sessionStorage.setItem("password", password);
-      router.push("/dashboard");
+      setDbConfig(dbConfig || null);
+      setRoles(roles);
+
+      // Redirect to the appropriate page
+      router.push(redirect);
     } catch (err) {
-      setError("Invalid credentials");
+      const errorMessage =
+        err.response?.data?.error || "An unexpected error occurred.";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -131,6 +133,7 @@ export function LoginUI() {
                 required
               />
             </div>
+
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? <UpdateIcon className="animate-spin" /> : "Login"}
             </Button>
@@ -141,5 +144,3 @@ export function LoginUI() {
     </div>
   );
 }
-
-export default LoginUI;

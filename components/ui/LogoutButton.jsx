@@ -1,20 +1,34 @@
 import React from "react";
-import { Button } from "./button";
+import { Button } from "@/components/ui/button";
+import axios from "axios"; 
 import { useRouter } from "next/router";
 
 const LogoutButton = () => {
   const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+     
+      await axios.post("/api/logout");
+
+      
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("domainname");
+      sessionStorage.removeItem("username");
+      sessionStorage.removeItem("password");
+
+      
+      router.push("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      
+    }
+  };
+
   return (
     <Button
       variant="ghost"
-      onClick={() => {
-        sessionStorage.removeItem("token");
-        sessionStorage.removeItem("domainname");
-        sessionStorage.removeItem("username");
-        sessionStorage.removeItem("password");
-
-        router.push("/");
-      }}
+      onClick={handleLogout} 
       className="mt-4 p-2 mr-2"
       style={{ float: "right" }}
       size="icon"

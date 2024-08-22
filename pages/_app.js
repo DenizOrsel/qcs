@@ -2,6 +2,7 @@ import { Manrope } from "next/font/google";
 import { cn } from "@/lib/utils";
 import "@/styles/globals.css";
 import { DarkModeProvider } from "@/context/DarkModeContext";
+import { AppProvider } from "@/context/AppContext";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import TokenRefresher from "@/components/TokenRefresher";
 
@@ -19,6 +20,7 @@ const fontBody = Manrope({
 
 export default function App({ Component, pageProps }) {
   return (
+    <AppProvider>
     <DarkModeProvider>
       <div
         className={cn("antialiased", fontHeading.variable, fontBody.variable)}
@@ -28,5 +30,6 @@ export default function App({ Component, pageProps }) {
         <Component {...pageProps} />
       </div>
     </DarkModeProvider>
+    </AppProvider>
   );
 }

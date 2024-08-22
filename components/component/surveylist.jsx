@@ -12,7 +12,7 @@ import {
 import axios from "axios";
 import Loader from "@/components/ui/Loader";
 
-export default function Surveylist() {
+export default function Surveylist({ region, domainname, dbConfig }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sort, setSort] = useState({ key: "SurveyName", order: "asc" });
   const [surveys, setSurveys] = useState([]);
@@ -25,15 +25,32 @@ export default function Surveylist() {
       try {
         const token = sessionStorage.getItem("token");
         const apiBaseUrl = localStorage.getItem("apiBaseUrl");
+        const dbPasswordString = Buffer.from(dbConfig.dbpassword.data).toString(
+          "utf-8"
+        );
+
+        if (!region || !domainname) {
+          setError("Region and domain name are required to fetch surveys.");
+          setLoading(false);
+          return;
+        }
+
         const response = await axios.get("/api/surveys", {
           headers: {
             token: token,
             "X-Custom-Url": apiBaseUrl,
+            "X-Region": region,
+            "X-Domain-Name": domainname,
+            "X-DB-Server": dbConfig.dbserver,
+            "X-DB-Database": dbConfig.dbdatabase,
+            "X-DB-User": dbConfig.dbuser,
+            "X-DB-Password": dbPasswordString,
           },
         });
+
         if (response.data.length === 0) {
           setError(
-            "There are no available surveys to check. It may be due to repository warming up. Please check back in 10 minutes."
+            "There are no available surveys to check. It may be due to the repository warming up. Please check back in 10 minutes."
           );
         } else {
           setSurveys(response.data);
@@ -45,8 +62,9 @@ export default function Surveylist() {
         setLoading(false);
       }
     };
+
     fetchSurveys();
-  }, []);
+  }, [region, domainname, dbConfig]);
 
   const handleSort = (key) => {
     if (sort.key === key) {
@@ -67,7 +85,6 @@ export default function Surveylist() {
           let aValue, bValue;
 
           if (sort.key === 4) {
-            // Calculate Task Completion percentage for sorting
             aValue =
               (1 -
                 (a.InterviewQualityCounts[0] + a.InterviewQualityCounts[2]) /
@@ -86,11 +103,9 @@ export default function Surveylist() {
                     b.InterviewQualityCounts[3])) *
               100;
           } else if (typeof sort.key === "number") {
-            // Sorting other numeric columns
             aValue = a.InterviewQualityCounts[sort.key];
             bValue = b.InterviewQualityCounts[sort.key];
           } else {
-            // Default sorting for strings and other properties
             aValue = a[sort.key];
             bValue = b[sort.key];
           }
@@ -104,7 +119,6 @@ export default function Surveylist() {
     [searchTerm, sort, surveys]
   );
 
-
   const handleRowClick = (surveyId) => {
     router.push(`/dashboard/${surveyId}`);
   };
@@ -113,9 +127,7 @@ export default function Surveylist() {
     <div className="min-h-screen">
       <div className="container mx-auto py-8 px-4">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">
-            CAPI Surveys on {sessionStorage.getItem("domainname")}
-          </h1>
+          <h1 className="text-2xl font-bold">CAPI Surveys on {domainname}</h1>
         </div>
         <div className="mb-4">
           <Input

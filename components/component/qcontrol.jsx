@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useContext } from "react";
 import { useRouter } from "next/router";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,6 +14,7 @@ import axios from "axios";
 import Error from "@/components/component/Error";
 import Loader from "@/components/ui/Loader";
 import FormatDuration from "../FormatDuration";
+import { AppContext } from "@/context/AppContext";
 
 export default function Qcontrol() {
   const router = useRouter();
@@ -23,6 +24,7 @@ export default function Qcontrol() {
   const [interviews, setInterviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+ const { dbConfig } = useContext(AppContext);
 
   const handleSearch = (e) => setSearch(e.target.value);
 
@@ -60,10 +62,17 @@ export default function Qcontrol() {
         try {
           const token = sessionStorage.getItem("token");
           const apiBaseUrl = localStorage.getItem("apiBaseUrl");
+          const dbPasswordString = Buffer.from(
+            dbConfig.dbpassword.data
+          ).toString("utf-8");
           const response = await axios.get("/api/interviewQuality", {
             headers: {
               Authorization: `Basic ${token}`,
               "X-Custom-Url": apiBaseUrl,
+              "X-DB-Server": dbConfig.dbserver,
+              "X-DB-Database": dbConfig.dbdatabase,
+              "X-DB-User": dbConfig.dbuser,
+              "X-DB-Password": dbPasswordString,
             },
             params: {
               surveyId,

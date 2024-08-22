@@ -1,9 +1,10 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useContext } from "react";
 import React from "react";
 import axios from "axios";
 import Error from "@/components/component/Error";
 import { Input } from "@/components/ui/input";
 import { UpdateIcon } from "@radix-ui/react-icons";
+import { AppContext } from "@/context/AppContext";
 
 const AnswersTable = ({
   surveyId,
@@ -15,12 +16,22 @@ const AnswersTable = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
+  const { dbConfig } = useContext(AppContext);
 
 useEffect(() => {
   if (surveyId && interviewId) {
     const fetchAnswers = async () => {
       try {
+                  const dbPasswordString = Buffer.from(
+                    dbConfig.dbpassword.data
+                  ).toString("utf-8");
         const response = await axios.get(`/api/answers`, {
+          headers: {
+            "X-DB-Server": dbConfig.dbserver,
+            "X-DB-Database": dbConfig.dbdatabase,
+            "X-DB-User": dbConfig.dbuser,
+            "X-DB-Password": dbPasswordString,
+          },
           params: { surveyId, interviewId },
         });
 

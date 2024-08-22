@@ -1,6 +1,6 @@
 import axios from "axios";
 import sql from "mssql";
-import { getDbConnection } from "@/lib/db";
+import { getTargetDbConnection } from "@/lib/targetDb";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -12,6 +12,10 @@ export default async function handler(req, res) {
   const token = req.headers["authorization"];
   const apiBaseUrl = req.headers["x-custom-url"];
   const { interviewId, surveyId } = req.query;
+  const dbserver = req.headers["x-db-server"];
+  const dbdatabase = req.headers["x-db-database"];
+  const dbuser = req.headers["x-db-user"];
+  const dbpassword = req.headers["x-db-password"];
 
   if (!token) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -23,8 +27,8 @@ export default async function handler(req, res) {
       .json({ error: "InterviewId and SurveyId are required" });
   }
 
+  let pool;
   try {
-    // Fetch InterviewQuality from Nfield API
     const nfieldResponse = await axios.get(
       `${apiBaseUrl}Surveys/${surveyId}/InterviewQuality/${interviewId}`,
       {
@@ -38,8 +42,12 @@ export default async function handler(req, res) {
     const interviewQuality = nfieldResponse.data.InterviewQuality;
 
     try {
-      // Connect to the database and fetch interview details
-      const pool = await getDbConnection();
+      pool = await getTargetDbConnection({
+        dbserver,
+        dbdatabase,
+        dbuser,
+        dbpassword,
+      });
       const request = pool.request();
       request.input("interviewId", sql.Int, interviewId);
       request.input("surveyId", sql.UniqueIdentifier, surveyId);
@@ -82,6 +90,8 @@ export default async function handler(req, res) {
     } catch (dbError) {
       console.error("Database error:", dbError);
       res.status(500).json({ error: "Database error" });
+    } finally {
+      if (pool) pool.close();
     }
   } catch (apiError) {
     console.error("Error fetching data from Nfield API:", apiError);

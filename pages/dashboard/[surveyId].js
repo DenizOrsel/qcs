@@ -1,11 +1,12 @@
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import Qcontrol from "@/components/component/qcontrol";
 import Loader from "@/components/ui/Loader";
 import Error from "@/components/component/Error";
 import LogoutButton from "@/components/ui/LogoutButton";
 import BackButton from "@/components/ui/backButton";
+import { AppContext } from "@/context/AppContext";
 
 const SurveyDetails = () => {
   const router = useRouter();
@@ -13,6 +14,7 @@ const SurveyDetails = () => {
   const [surveyData, setSurveyData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { dbConfig } = useContext(AppContext);
 
   useEffect(() => {
     if (surveyId) {

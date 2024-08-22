@@ -1,17 +1,22 @@
 import axios from "axios";
 import sql from "mssql";
-import { getDbConnection } from "@/lib/db";
+import { getTargetDbConnection } from "@/lib/targetDb";
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
     const { surveyId } = req.query;
     const { authorization } = req.headers;
     const apiBaseUrl = req.headers["x-custom-url"];
+    const dbserver = req.headers["x-db-server"];
+    const dbdatabase = req.headers["x-db-database"];
+    const dbuser = req.headers["x-db-user"];
+    const dbpassword = req.headers["x-db-password"];
 
     if (!authorization || !surveyId) {
       return res.status(400).json({ error: "Missing token or surveyId" });
     }
 
+    let pool;
     try {
       const qualityResponse = await axios.get(
         `${apiBaseUrl}Surveys/${surveyId}/InterviewQuality`,
@@ -30,7 +35,12 @@ export default async function handler(req, res) {
       );
       const interviewIdsString = interviewIds.map((id) => `'${id}'`).join(", ");
 
-      const pool = await getDbConnection();
+      pool = await getTargetDbConnection({
+        dbserver,
+        dbdatabase,
+        dbuser,
+        dbpassword,
+      });
 
       const request = pool.request();
       request.input("nfieldSurveyId", sql.UniqueIdentifier, surveyId);
@@ -51,7 +61,6 @@ export default async function handler(req, res) {
       const result = await request.query(sqlQuery);
       const interviewsData = result.recordset;
 
-      // Merge the SQL data with the Nfield API data
       const mergedData = interviewData.map((interview) => {
         const match = interviewsData.find(
           (i) => i.NfieldInterviewId === parseInt(interview.Id, 10).toString()
@@ -68,6 +77,8 @@ export default async function handler(req, res) {
     } catch (error) {
       console.error("Error fetching interview quality data:", error);
       res.status(500).json({ error: "Error fetching interview quality data" });
+    } finally {
+      if (pool) pool.close();
     }
   } else {
     res.status(405).json({ error: "Method not allowed" });

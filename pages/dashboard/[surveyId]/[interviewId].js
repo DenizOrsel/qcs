@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import AnswersTable from "@/components/component/AnswersTable";
 import axios from "axios";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import { UpdateIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
 import { Card } from "@/components/ui/Card";
 import FormatDuration from "@/components/FormatDuration";
+import { AppContext } from "@/context/AppContext";
 
 const InterviewDetailsPage = () => {
   const router = useRouter();
@@ -27,19 +28,28 @@ const InterviewDetailsPage = () => {
   const [answersLoaded, setAnswersLoaded] = useState(false);
   const [audioFile, setAudioFile] = useState(null);
   const [loadingAssets, setLoadingAssets] = useState(false);
-
+  const { dbConfig } = useContext(AppContext);
+ 
   useEffect(() => {
     if (interviewId && surveyId) {
+
       const fetchInterviewDetails = async () => {
         try {
           const token = sessionStorage.getItem("token");
           const apiBaseUrl = localStorage.getItem("apiBaseUrl");
+                    const dbPasswordString = Buffer.from(
+                      dbConfig.dbpassword.data
+                    ).toString("utf-8");
           const response = await axios.get(`/api/interviewDetails`, {
             params: { interviewId, surveyId },
             headers: {
               Authorization: token,
               "Content-Type": "application/json",
               "X-Custom-Url": apiBaseUrl,
+              "X-DB-Server": dbConfig.dbserver,
+              "X-DB-Database": dbConfig.dbdatabase,
+              "X-DB-User": dbConfig.dbuser,
+              "X-DB-Password": dbPasswordString,
             },
           });
           setInterviewDetails(response.data);
