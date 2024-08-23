@@ -1,34 +1,35 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Button } from "@/components/ui/button";
-import axios from "axios"; 
+import axios from "axios";
 import { useRouter } from "next/router";
+import { AppContext } from "@/context/AppContext";
 
 const LogoutButton = () => {
   const router = useRouter();
+  const { setRegion, setDomainname, setDbConfig, setRoles } =
+    useContext(AppContext);
 
   const handleLogout = async () => {
     try {
-     
       await axios.post("/api/logout");
 
-      
-      sessionStorage.removeItem("token");
-      sessionStorage.removeItem("domainname");
-      sessionStorage.removeItem("username");
-      sessionStorage.removeItem("password");
+      sessionStorage.clear();
 
-      
+      setRegion("");
+      setDomainname("");
+      setDbConfig(null);
+      setRoles([]);
+
       router.push("/");
     } catch (error) {
       console.error("Logout failed:", error);
-      
     }
   };
 
   return (
     <Button
       variant="ghost"
-      onClick={handleLogout} 
+      onClick={handleLogout}
       className="mt-4 p-2 mr-2"
       style={{ float: "right" }}
       size="icon"

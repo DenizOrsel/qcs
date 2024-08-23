@@ -28,7 +28,6 @@ export default function Dashboard() {
 
   return (
     <ProtectedRoute>
-      <LogoutButton />
       <Surveylist region={region} domainname={domainname} dbConfig={dbConfig} />
     </ProtectedRoute>
   );

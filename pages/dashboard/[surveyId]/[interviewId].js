@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import Toaster from "@/components/ui/toaster";
 import Loader from "@/components/ui/Loader";
 import Error from "@/components/component/Error";
-import LogoutButton from "@/components/ui/LogoutButton";
 import BackButton from "@/components/ui/backButton";
 import Audioplayback from "@/components/component/Audioplayback";
 import { UpdateIcon } from "@radix-ui/react-icons";
@@ -208,7 +207,6 @@ const renderAnswerWithImages = (answer) => {
   return (
     <div className="min-h-screen">
       <BackButton href={`/dashboard/${surveyId}`} />
-      <LogoutButton />
       <div className="container mx-auto py-8 px-4">
         {interviewDetails && (
           <>

@@ -4,7 +4,6 @@ import axios from "axios";
 import Qcontrol from "@/components/component/qcontrol";
 import Loader from "@/components/ui/Loader";
 import Error from "@/components/component/Error";
-import LogoutButton from "@/components/ui/LogoutButton";
 import BackButton from "@/components/ui/backButton";
 import { AppContext } from "@/context/AppContext";
 
@@ -49,7 +48,6 @@ const SurveyDetails = () => {
   return (
     <>
       <BackButton href={`/dashboard`} />
-      <LogoutButton />
       <div className="p-8 md:p-8 m-8">
         <h1 className="text-xl md:text-2xl mb-4">Survey {surveyData.Name}</h1>
         <Qcontrol />
