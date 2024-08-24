@@ -52,7 +52,6 @@ const InterviewDetailsPage = () => {
             },
           });
           setInterviewDetails(response.data);
-          console.log("/api/interviewDetails fetched")
         } catch (error) {
           console.error("Error fetching interview details:", error);
           setError("Error fetching interview details");
