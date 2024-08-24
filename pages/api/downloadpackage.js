@@ -72,6 +72,7 @@ export default async function handler(req, res) {
 
       await new Promise((resolve) => setTimeout(resolve, retryInterval));
     }
+
     if (!downloadUrl) {
       return res
         .status(500)
@@ -85,53 +86,64 @@ export default async function handler(req, res) {
     const zip = new AdmZip(zipResponse.data);
     const zipEntries = zip.getEntries();
 
-        if (zipEntries.length < 7) {
-          return res
-            .status(404)
-            .json({ message: "There is nothing to stream" });
-        }
+    const files = [];
 
-    const auditFileEntry = zipEntries.find((entry) =>
-      entry.entryName.endsWith(".csv") && entry.entryName.includes("auditlog")
-    );
-    const auditFile = await csvtojson({delimiter: "\t"}).fromString(
-      auditFileEntry.getData().toString("utf-16le")
+    // Handle the audit log CSV file
+    const auditFileEntry = zipEntries.find(
+      (entry) =>
+        entry.entryName.endsWith(".csv") && entry.entryName.includes("auditlog")
     );
 
-    const mpegFileEntry = zipEntries.find((entry) =>
-      entry.entryName.endsWith(".mpeg4") && entry.entryName.includes("silent")
+    if (auditFileEntry) {
+      const auditFile = await csvtojson({ delimiter: "\t" }).fromString(
+        auditFileEntry.getData().toString("utf-16le")
+      );
+
+      files.push({
+        filename: "auditlog.json",
+        content: auditFile,
+      });
+    }
+
+    // Handle the MPEG file if it exists
+    const mpegFileEntry = zipEntries.find(
+      (entry) =>
+        entry.entryName.endsWith(".mpeg4") && entry.entryName.includes("silent")
     );
 
+    if (mpegFileEntry) {
+      const mpegData = mpegFileEntry.getData();
+      const mpegStream = new Readable();
+      mpegStream._read = () => {};
+      mpegStream.push(mpegData);
+      mpegStream.push(null);
+
+      const clip = await streampot
+        .input("data:video/mp4;base64," + mpegData.toString("base64"))
+        .output("silent.mp3")
+        .runAndWait();
+
+      const audioFile = clip.outputs["silent.mp3"];
+
+      files.push({
+        filename: "silent.mp3",
+        content: audioFile,
+      });
+    }
+
+    // Handle the JPEG files if they exist
     const jpgEntries = zipEntries.filter((entry) =>
       entry.entryName.endsWith(".jpg")
     );
 
-    const mpegData = mpegFileEntry.getData();
-    const mpegStream = new Readable();
-    mpegStream._read = () => {};
-    mpegStream.push(mpegData);
-    mpegStream.push(null);
-
-    const clip = await streampot
-      .input("data:video/mp4;base64," + mpegData.toString("base64"))
-      .output("silent.mp3")
-      .runAndWait();
-
-    const audioFile = clip.outputs["silent.mp3"];
-
-    const files = jpgEntries.map((entry) => ({
-      filename: entry.entryName,
-      content: entry.getData().toString("base64"),
-    }));
-
-    files.push({
-      filename: "silent.mp3",
-      content: audioFile,
-    },{
-      filename: "auditlog.json",
-      content: auditFile,
-    });
-
+    if (jpgEntries.length > 0) {
+      jpgEntries.forEach((entry) => {
+        files.push({
+          filename: entry.entryName,
+          content: entry.getData().toString("base64"),
+        });
+      });
+    }
 
     res.status(200).json({ files });
   } catch (error) {

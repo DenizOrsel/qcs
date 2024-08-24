@@ -5,6 +5,8 @@ import Error from "@/components/component/Error";
 import { Input } from "@/components/ui/input";
 import { UpdateIcon } from "@radix-ui/react-icons";
 import { AppContext } from "@/context/AppContext";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const AnswersTable = ({
   surveyId,
@@ -14,12 +16,15 @@ const AnswersTable = ({
   downloadedFiles,
 }) => {
   const [groupedAnswers, setGroupedAnswers] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [loadingAnswers, setLoadingAnswers] = useState(true);
+  const [loadingAuditLog, setLoadingAuditLog] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const { dbConfig } = useContext(AppContext);
   const [auditLog, setAuditLog] = useState([]);
+  const [elapsedTimes, setElapsedTimes] = useState({});
 
+  // Fetch Audit Log
   useEffect(() => {
     if (downloadedFiles) {
       const auditFile = downloadedFiles.find(
@@ -27,10 +32,20 @@ const AnswersTable = ({
       );
       if (auditFile) {
         setAuditLog(auditFile.content); // Assuming auditFile.content is the parsed JSON
+
+        // Extract elapsed times for each question from the audit log
+        const elapsedTimesMap = auditFile.content.reduce((acc, logEntry) => {
+          acc[logEntry.QuestionId] = logEntry.ElapsedTime;
+          return acc;
+        }, {});
+
+        setElapsedTimes(elapsedTimesMap);
       }
+      setLoadingAuditLog(false); // Audit log has been processed
     }
   }, [downloadedFiles]);
 
+  // Fetch Answers
   useEffect(() => {
     if (surveyId && interviewId) {
       const fetchAnswers = async () => {
@@ -61,17 +76,9 @@ const AnswersTable = ({
               ? questionText.split(" ").slice(-1)[0]
               : null;
 
-            // Find elapsed time from audit log
-            const auditEntry = auditLog.find(
-              (log) => log.QuestionId === mainQuestionKey
-            );
-            const elapsedTime = auditEntry
-              ? ` (Elapsed Time: ${auditEntry.ElapsedTime}s)`
-              : "";
-
             if (!acc[mainQuestionKey]) {
               acc[mainQuestionKey] = {
-                questionText: questionText + elapsedTime,
+                questionText,
                 originalKey: mainQuestionKey + ":",
                 answers: [],
               };
@@ -104,7 +111,7 @@ const AnswersTable = ({
           console.error("Error fetching answers:", error);
           setError("Error fetching answers");
         } finally {
-          setLoading(false);
+          setLoadingAnswers(false); // Answers have been processed
           onLoaded();
         }
       };
@@ -124,12 +131,14 @@ const AnswersTable = ({
     );
   }, [search, groupedAnswers]);
 
-  if (loading)
+  if (loadingAnswers || loadingAuditLog) {
     return (
       <div className="flex items-center justify-center h-screen">
         <UpdateIcon className="animate-spin h-10 w-10 text-blue-500" />
       </div>
     );
+  }
+
   if (error) return <Error error={error} />;
 
   return (
@@ -147,15 +156,28 @@ const AnswersTable = ({
             <React.Fragment key={index}>
               <div className="text-sm font-medium text-muted-foreground mt-5">
                 <strong>{groupedAnswers[questionKey]?.originalKey}</strong>{" "}
-                {groupedAnswers[questionKey]?.questionText}
+                {groupedAnswers[questionKey]?.questionText}{" "}
+                {elapsedTimes[questionKey] !== undefined ? (
+                  <span className="font-mono">(Duration: {elapsedTimes[questionKey]}s)</span>
+                ) : (
+                  <SkeletonTheme color="#e5e7eb" highlightColor="#B6B6B6">
+                    <Skeleton width={100} />
+                  </SkeletonTheme>
+                )}
               </div>
               <div className="text-base font-medium">
-                {groupedAnswers[questionKey]?.answers.map((answer, idx) => (
-                  <div key={idx}>
-                    {answer.label ? <strong>{answer.label}: </strong> : null}
-                    {renderAnswerWithImages(answer.value)}
-                  </div>
-                ))}
+                {groupedAnswers[questionKey]?.answers.length > 0 ? (
+                  groupedAnswers[questionKey]?.answers.map((answer, idx) => (
+                    <div key={idx}>
+                      {answer.label ? <strong>{answer.label}: </strong> : null}
+                      {renderAnswerWithImages(answer.value) || (
+                        <Skeleton height={100} width={100} />
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <Skeleton count={3} />
+                )}
               </div>
             </React.Fragment>
           ))}
