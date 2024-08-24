@@ -11,12 +11,25 @@ const AnswersTable = ({
   interviewId,
   renderAnswerWithImages,
   onLoaded,
+  downloadedFiles,
 }) => {
   const [groupedAnswers, setGroupedAnswers] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const { dbConfig } = useContext(AppContext);
+  const [auditLog, setAuditLog] = useState([]);
+
+  useEffect(() => {
+    if (downloadedFiles) {
+      const auditFile = downloadedFiles.find(
+        (file) => file.filename === "auditlog.json"
+      );
+      if (auditFile) {
+        setAuditLog(auditFile.content); // Assuming auditFile.content is the parsed JSON
+      }
+    }
+  }, [downloadedFiles]);
 
   useEffect(() => {
     if (surveyId && interviewId) {
@@ -39,19 +52,27 @@ const AnswersTable = ({
           const grouped = data.reduce((acc, answer) => {
             const isSubQuestion = /F\d+$/.test(answer.NfieldQuestionId);
             const mainQuestionKey = isSubQuestion
-              ? answer.NfieldQuestionId.replace(/F\d+$/, "") // Remove F and digits after it
+              ? answer.NfieldQuestionId.replace(/F\d+$/, "")
               : answer.NfieldQuestionId;
             const questionText = answer.QuestionText
               ? answer.QuestionText.trim()
               : "";
             const subQuestionKey = isSubQuestion
-              ? questionText.split(" ").slice(-1)[0] // Use the last word as the sub-question label (like "Transportation")
+              ? questionText.split(" ").slice(-1)[0]
               : null;
+
+            // Find elapsed time from audit log
+            const auditEntry = auditLog.find(
+              (log) => log.QuestionId === mainQuestionKey
+            );
+            const elapsedTime = auditEntry
+              ? ` (Elapsed Time: ${auditEntry.ElapsedTime}s)`
+              : "";
 
             if (!acc[mainQuestionKey]) {
               acc[mainQuestionKey] = {
-                questionText,
-                originalKey: mainQuestionKey + ":", // Display only the main part of the question key
+                questionText: questionText + elapsedTime,
+                originalKey: mainQuestionKey + ":",
                 answers: [],
               };
             }
@@ -90,7 +111,7 @@ const AnswersTable = ({
 
       fetchAnswers();
     }
-  }, [surveyId, interviewId, onLoaded]);
+  }, [surveyId, interviewId, onLoaded, auditLog]);
 
   const handleSearch = (e) => setSearch(e.target.value);
 

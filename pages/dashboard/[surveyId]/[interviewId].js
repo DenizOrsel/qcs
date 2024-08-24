@@ -1,7 +1,8 @@
+import axios from "axios";
 import { useRouter } from "next/router";
 import { useEffect, useState, useContext } from "react";
+import { AppContext } from "@/context/AppContext";
 import AnswersTable from "@/components/component/AnswersTable";
-import axios from "axios";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Toaster from "@/components/ui/toaster";
@@ -13,7 +14,6 @@ import { UpdateIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
 import { Card } from "@/components/ui/Card";
 import FormatDuration from "@/components/FormatDuration";
-import { AppContext } from "@/context/AppContext";
 
 const InterviewDetailsPage = () => {
   const router = useRouter();
@@ -82,7 +82,6 @@ const InterviewDetailsPage = () => {
       );
 
       setDownloadedFiles(response.data.files);
-      console.log("download package fetched");
       const audioFile = response.data.files.find(
         (file) =>
           file.filename.includes("silent") && file.filename.endsWith(".mp3")

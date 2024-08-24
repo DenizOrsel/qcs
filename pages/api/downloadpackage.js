@@ -2,6 +2,7 @@ import axios from "axios";
 import AdmZip from "adm-zip";
 import StreamPot from "@streampot/client";
 import { Readable } from "stream";
+import csvtojson from "csvtojson";
 
 const streampot = new StreamPot({
   secret: process.env.STREAMING_SERVER,
@@ -25,7 +26,9 @@ export default async function handler(req, res) {
       `${apiBaseUrl}Surveys/${surveyId}/DataDownload/${interviewId}`,
       {
         IncludeSuccessful: true,
+        IncludeRejected: true,
         IncludeCapturedMediaFiles: true,
+        IncludeAuditLog: true,
       },
       {
         headers: {
@@ -69,7 +72,6 @@ export default async function handler(req, res) {
 
       await new Promise((resolve) => setTimeout(resolve, retryInterval));
     }
-
     if (!downloadUrl) {
       return res
         .status(500)
@@ -88,6 +90,13 @@ export default async function handler(req, res) {
             .status(404)
             .json({ message: "There is nothing to stream" });
         }
+
+    const auditFileEntry = zipEntries.find((entry) =>
+      entry.entryName.endsWith(".csv") && entry.entryName.includes("auditlog")
+    );
+    const auditFile = await csvtojson({delimiter: "\t"}).fromString(
+      auditFileEntry.getData().toString("utf-16le")
+    );
 
     const mpegFileEntry = zipEntries.find((entry) =>
       entry.entryName.endsWith(".mpeg4") && entry.entryName.includes("silent")
@@ -115,10 +124,12 @@ export default async function handler(req, res) {
       content: entry.getData().toString("base64"),
     }));
 
-    
     files.push({
       filename: "silent.mp3",
       content: audioFile,
+    },{
+      filename: "auditlog.json",
+      content: auditFile,
     });
 
 
