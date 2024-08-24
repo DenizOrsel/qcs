@@ -91,7 +91,7 @@ const InterviewDetailsPage = () => {
       setAudioFile(audioFile);
 
     } catch (error) {
-      console.log("Info: There is no stream available for the record.");
+      console.log("Info: There is no stream available for the record.", error);
     } finally {
       setLoadingAssets(false);
     }
