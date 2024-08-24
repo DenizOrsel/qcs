@@ -52,6 +52,7 @@ const InterviewDetailsPage = () => {
             },
           });
           setInterviewDetails(response.data);
+          console.log("/api/interviewDetails fetched")
         } catch (error) {
           console.error("Error fetching interview details:", error);
           setError("Error fetching interview details");
@@ -82,7 +83,7 @@ const InterviewDetailsPage = () => {
       );
 
       setDownloadedFiles(response.data.files);
-
+      console.log("download package fetched");
       const audioFile = response.data.files.find(
         (file) =>
           file.filename.includes("silent") && file.filename.endsWith(".mp3")
