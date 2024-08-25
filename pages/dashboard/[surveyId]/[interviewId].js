@@ -322,10 +322,7 @@ const renderAnswerWithImages = (answer) => {
                 <div className="text-base font-medium">
                   <FormatDuration seconds={interviewDetails.ActiveSeconds} />{" "}
                   <span className="font-extralight ml-2">
-                    Survey Average:{" "}
-                    <FormatDuration
-                      seconds={xlmns}
-                    />
+                    Survey Average: <FormatDuration seconds={xlmns} />
                   </span>
                 </div>
               </div>
@@ -390,7 +387,12 @@ const renderAnswerWithImages = (answer) => {
           renderAnswerWithImages={renderAnswerWithImages}
           onLoaded={handleAnswersLoaded}
         />
-        {audioFile && <Audioplayback audioSrc={audioFile.content} />}
+        {audioFile && (
+          <Audioplayback
+            audioSrc={audioFile.content}
+            downloadedFiles={downloadedFiles}
+          />
+        )}
       </div>
       {toasterVisible && (
         <Toaster
