@@ -1,11 +1,14 @@
 import axios from "axios";
 import AdmZip from "adm-zip";
-import StreamPot from "@streampot/client";
 import { Readable } from "stream";
 import csvtojson from "csvtojson";
+import { v2 as cloudinary } from "cloudinary";
 
-const streampot = new StreamPot({
-  secret: process.env.STREAMING_SERVER,
+// Cloudinary configuration
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 export default async function handler(req, res) {
@@ -113,24 +116,23 @@ export default async function handler(req, res) {
 
     if (mpegFileEntry) {
       const mpegData = mpegFileEntry.getData();
-      const mpegStream = new Readable();
-      mpegStream._read = () => {};
-      mpegStream.push(mpegData);
-      mpegStream.push(null);
 
-      const clip = await streampot
-        .input("data:video/mp4;base64," + mpegData.toString("base64"))
-        .output("silent.mp3")
-        .runAndWait();
+      // Upload MPEG4 to Cloudinary and convert it to MP3
+      const uploadResult = await cloudinary.uploader.upload(
+        `data:video/mp4;base64,${mpegData.toString("base64")}`,
+        {
+          resource_type: "video",
+          public_id: "silent",
+          format: "mp3",
+        }
+      );
 
-      const audioFile = clip.outputs["silent.mp3"];
-
-     if (audioFile) {
-       files.push({
-         filename: "silent.mp3",
-         content: audioFile,
-       });
-     };
+      if (uploadResult.secure_url) {
+        files.push({
+          filename: "silent.mp3",
+          content: uploadResult.secure_url,
+        });
+      }
     }
 
     // Handle the JPEG files if they exist
