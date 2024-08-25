@@ -3,7 +3,7 @@ import ReactHowler from "react-howler";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 
-export default function Audioplayback({ audioSrc, downloadedFiles }) {
+export default function Audioplayback({audioSrc, downloadedFiles}) {
   const [playing, setPlaying] = useState(false);
   const [seek, setSeek] = useState(0);
   const [duration, setDuration] = useState(0);
