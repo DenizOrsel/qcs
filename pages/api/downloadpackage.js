@@ -125,10 +125,12 @@ export default async function handler(req, res) {
 
       const audioFile = clip.outputs["silent.mp3"];
 
-      files.push({
-        filename: "silent.mp3",
-        content: audioFile,
-      });
+     if (audioFile) {
+       files.push({
+         filename: "silent.mp3",
+         content: audioFile,
+       });
+     };
     }
 
     // Handle the JPEG files if they exist
