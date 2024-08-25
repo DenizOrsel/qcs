@@ -2,14 +2,36 @@ import React, { useState, useEffect, useRef } from "react";
 import ReactHowler from "react-howler";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
 
-export default function Audioplayback({audioSrc, downloadedFiles}) {
+export default function Audioplayback({ audioSrc, downloadedFiles }) {
   const [playing, setPlaying] = useState(false);
   const [seek, setSeek] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1.0);
   const howlerRef = useRef(null);
   const [muted, setMuted] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  let cumulativeTime = 0;
+  const markers = downloadedFiles[0].content.map((item) => {
+    const startTime = cumulativeTime;
+    cumulativeTime += parseFloat(item.ElapsedTime);
+    return {
+      startTime: startTime,
+      endTime: cumulativeTime,
+      label: item.QuestionId,
+    };
+  });
+
+  const rainbowColors = [
+    "red",
+    "orange",
+    "yellow",
+    "green",
+    "indigo",
+    "violet",
+  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -49,11 +71,33 @@ export default function Audioplayback({audioSrc, downloadedFiles}) {
     howlerRef.current.mute(!muted);
   };
 
+  const handleSearchQueryChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+
+    const marker = markers.find((m) =>
+      m.label.toLowerCase().startsWith(query.toLowerCase())
+    );
+    if (marker && howlerRef.current) {
+      howlerRef.current.seek(marker.startTime);
+      setSeek(marker.startTime);
+    }
+  };
+
   return (
     <div className="fixed inset-x-0 bottom-0 bg-background border-t border-muted shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1),0_-2px_4px_-2px_rgba(0,0,0,0.1)] flex justify-center items-center">
+      {/* Search Input */}
+      <div className="flex items-center gap-2">
+        <Input
+          type="text"
+          value={searchQuery}
+          onChange={handleSearchQueryChange}
+          placeholder="Jump to question"
+          className="mt-4"
+        />
+      </div>
       <div className="container px-4 py-3 flex items-center gap-4">
         {/* Play/Pause Button */}
-
         <Button variant="ghost" size="icon" onClick={togglePlayPause}>
           {playing ? (
             <CircleStopIcon className="w-5 h-5" />
@@ -63,13 +107,77 @@ export default function Audioplayback({audioSrc, downloadedFiles}) {
         </Button>
 
         {/* Slider */}
-        <div className="flex-1 mx-4 mt-3">
+        <div className="flex-1 mx-4 mt-3 relative">
           <Slider
-            className="w-full cursor-grab [&>span:first-child]:h-1 [&>span:first-child]:bg-primary/30 [&_[role=slider]]:bg-primary [&_[role=slider]]:w-3 [&_[role=slider]]:h-3 [&_[role=slider]]:border-0 [&>span:first-child_span]:bg-primary [&_[role=slider]:focus-visible]:ring-0 [&_[role=slider]:focus-visible]:ring-offset-0 [&_[role=slider]:focus-visible]:scale-105 [&_[role=slider]:focus-visible]:transition-transform"
+            className="w-full cursor-grab z-10 [&>span:first-child]:h-1 [&>span:first-child]:bg-primary/30 [&_[role=slider]]:bg-primary [&_[role=slider]]:w-3 [&_[role=slider]]:h-3 [&_[role=slider]]:border-0 [&>span:first-child_span]:bg-primary [&_[role=slider]:focus-visible]:ring-0 [&_[role=slider]:focus-visible]:ring-offset-0 [&_[role=slider]:focus-visible]:scale-105 [&_[role=slider]:focus-visible]:transition-transform"
             value={[seek]}
             max={duration}
             onValueChange={([value]) => handleSliderChange(value)}
           />
+
+          {markers.map((marker, index) => {
+            const start = marker.startTime;
+            const end = marker.endTime;
+            const left = (start / duration) * 100;
+            const width = ((end - start) / duration) * 100;
+            const color = rainbowColors[index % rainbowColors.length];
+
+            return (
+              <div
+                key={index}
+                style={{
+                  position: "absolute",
+                  left: `${left}%`,
+                  width: `${width}%`,
+                  height: "100%",
+                  backgroundColor: color,
+                  opacity: 0.5,
+                  zIndex: 1,
+                }}
+              />
+            );
+          })}
+          {markers.map((marker, index) => (
+            <div
+              key={index}
+              style={{
+                position: "absolute",
+                left: `${(marker.startTime / duration) * 100}%`,
+                transform: "translateX(-50%)",
+                top: "-10px",
+                zIndex: 2,
+                pointerEvents: "none",
+                display: "flex",
+                alignItems: "center",
+                flexDirection: "column",
+              }}
+            >
+              {/* Triangle pointing right */}
+              <div
+                className="text-primary"
+                style={{
+                  width: 0,
+                  height: 0,
+                  borderLeft: "6px solid",
+                  borderTop: "6px solid transparent",
+                  borderBottom: "6px solid transparent",
+                  marginTop: "18px",
+                  marginLeft: "7px",
+                }}
+              ></div>
+              {/* Question label */}
+              <div
+                className="text-primary"
+                style={{
+                  fontSize: "10px",
+                  marginLeft: "26px",
+                  marginTop: "0px",
+                }}
+              >
+                {marker.label}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Duration and Volume Control */}
@@ -193,4 +301,3 @@ function Volume2Icon(props) {
     </svg>
   );
 }
-
