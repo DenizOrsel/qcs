@@ -28,6 +28,11 @@ const InterviewDetailsPage = () => {
   const [audioFile, setAudioFile] = useState(null);
   const [loadingAssets, setLoadingAssets] = useState(false);
   const { dbConfig } = useContext(AppContext);
+ const [currentQuestionId, setCurrentQuestionId] = useState(null);
+
+ const handleQuestionChange = (questionId) => {
+   setCurrentQuestionId(questionId);
+ };
  
   useEffect(() => {
     if (interviewId && surveyId) {
@@ -386,11 +391,13 @@ const renderAnswerWithImages = (answer) => {
           downloadedFiles={downloadedFiles}
           renderAnswerWithImages={renderAnswerWithImages}
           onLoaded={handleAnswersLoaded}
+          currentQuestionId={currentQuestionId}
         />
         {audioFile && (
           <Audioplayback
             audioSrc={audioFile.content}
             downloadedFiles={downloadedFiles}
+            onQuestionChange={handleQuestionChange}
           />
         )}
       </div>

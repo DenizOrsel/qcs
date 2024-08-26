@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useContext } from "react";
+import { useEffect, useState, useMemo, useContext, useRef } from "react";
 import React from "react";
 import axios from "axios";
 import Error from "@/components/component/Error";
@@ -8,12 +8,14 @@ import { AppContext } from "@/context/AppContext";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
+
 const AnswersTable = ({
   surveyId,
   interviewId,
   renderAnswerWithImages,
   onLoaded,
   downloadedFiles,
+  currentQuestionId,
 }) => {
   const [groupedAnswers, setGroupedAnswers] = useState({});
   const [loadingAnswers, setLoadingAnswers] = useState(true);
@@ -23,7 +25,7 @@ const AnswersTable = ({
   const { dbConfig } = useContext(AppContext);
   const [auditLog, setAuditLog] = useState([]);
   const [elapsedTimes, setElapsedTimes] = useState({});
-
+  const questionRefs = useRef({});
   // Fetch Audit Log
   useEffect(() => {
     if (downloadedFiles) {
@@ -150,6 +152,16 @@ const AnswersTable = ({
 
   const handleSearch = (e) => setSearch(e.target.value);
 
+    useEffect(() => {
+      if (currentQuestionId && questionRefs.current[currentQuestionId]) {
+        // Scroll to the active question
+        questionRefs.current[currentQuestionId].scrollIntoView({
+          behavior: "smooth", // Smooth scrolling
+          block: "center", // Scroll to the center of the viewport
+        });
+      }
+    }, [currentQuestionId]);
+
   const filteredQuestions = useMemo(() => {
     const searchValue = search.toLowerCase();
     return Object.keys(groupedAnswers).filter((questionKey) =>
@@ -182,7 +194,17 @@ const AnswersTable = ({
         <div>
           {filteredQuestions.map((questionKey, index) => (
             <React.Fragment key={index}>
-              <div className="text-sm font-medium text-muted-foreground mt-5">
+              <div
+                ref={(el) => (questionRefs.current[questionKey] = el)}
+                className={`text-sm font-medium text-muted-foreground mt-5 ${
+                  currentQuestionId === questionKey
+                    ? "bg-yellow-200 rounded dark:bg-yellow-800"
+                    : ""
+                }`}
+                style={{
+                  transition: "background-color 0.5s ease", // Add smooth transition
+                }}
+              >
                 <strong>{groupedAnswers[questionKey]?.originalKey}</strong>{" "}
                 {groupedAnswers[questionKey]?.questionText}{" "}
                 {elapsedTimes[questionKey] !== undefined ? (
@@ -194,20 +216,22 @@ const AnswersTable = ({
                     <Skeleton width={100} />
                   </SkeletonTheme>
                 )}
-              </div>
-              <div className="text-base font-medium">
-                {groupedAnswers[questionKey]?.answers.length > 0 ? (
-                  groupedAnswers[questionKey]?.answers.map((answer, idx) => (
-                    <div key={idx}>
-                      {answer.label ? <strong>{answer.label}: </strong> : null}
-                      {renderAnswerWithImages(answer.value) || (
-                        <Skeleton height={100} width={100} />
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <Skeleton count={3} />
-                )}
+                <div className="text-base font-medium">
+                  {groupedAnswers[questionKey]?.answers.length > 0 ? (
+                    groupedAnswers[questionKey]?.answers.map((answer, idx) => (
+                      <div key={idx}>
+                        {answer.label ? (
+                          <strong>{answer.label}: </strong>
+                        ) : null}
+                        {renderAnswerWithImages(answer.value) || (
+                          <Skeleton height={100} width={100} />
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <Skeleton count={3} />
+                  )}
+                </div>
               </div>
             </React.Fragment>
           ))}

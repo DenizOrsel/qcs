@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 
-export default function Audioplayback({ audioSrc, downloadedFiles }) {
+export default function Audioplayback({ audioSrc, downloadedFiles, onQuestionChange }) {
   const [playing, setPlaying] = useState(false);
   const [seek, setSeek] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -23,6 +23,21 @@ export default function Audioplayback({ audioSrc, downloadedFiles }) {
       label: item.QuestionId,
     };
   });
+
+   const processQuestionId = (questionId) => {
+     const match = questionId.match(/Q\d+/);
+     return match ? match[0] : questionId; 
+   };
+
+  useEffect(() => {
+    const currentMarker = markers.find(
+      (marker) => seek >= marker.startTime && seek <= marker.endTime
+    );
+
+    if (currentMarker) {
+      onQuestionChange(processQuestionId(currentMarker.label));
+    }
+  }, [seek, markers, onQuestionChange]);
 
   const rainbowColors = [
     "red",
