@@ -25,41 +25,71 @@ export default async function handler(req, res) {
 
       let query = `
         SELECT 
-          a.Id AS AnswerId,
-          a.AlphaValue,
-          a.InterviewId,
-          a.NumericValue,
-          a.QuestionId,
-          a.CategoryValueId,
-          q.Text AS QuestionText,
-          q.NfieldQuestionId,
-          i.Id AS InterviewId,
-          i.SampleDataRecordId,
-          i.EndTime,
-          i.StartTime,
-          i.Status,
-          i.Successful,
-          i.ResponseCode,
-          i.ProcessTime,
-          i.LastUpdated,
-          i.NfieldInterviewId,
-          i.ActiveSeconds,
-          i.Final,
-          i.Test,
-          i.CalculatedResult,
-          qc.Value AS CategoryValueText
-        FROM dbo.Answers a
-        JOIN dbo.Questions q ON a.QuestionId = q.Id
-        JOIN dbo.Interviews i ON a.InterviewId = i.SampleDataRecordId
-        JOIN dbo.Surveys s ON q.SurveyId = s.Id
-        LEFT JOIN dbo.QuestionCategories qc ON a.CategoryValueId = qc.Id
-        WHERE s.NfieldSurveyId = @surveyId
+  a.Id AS AnswerId,
+  a.AlphaValue,
+  a.InterviewId,
+  a.NumericValue,
+  a.QuestionId,
+  a.CategoryValueId,
+  q.[Text] AS QuestionText,
+  q.NfieldQuestionId,
+  i.Id AS InterviewId,
+  i.SampleDataRecordId,
+  i.EndTime,
+  i.StartTime,
+  i.[Status],
+  i.Successful,
+  i.ResponseCode,
+  i.ProcessTime,
+  i.LastUpdated,
+  i.NfieldInterviewId,
+  i.ActiveSeconds,
+  i.Final,
+  i.Test,
+  i.CalculatedResult,
+  qc.[Value] AS CategoryValueText,
+  STRING_AGG(cli.Label, ', ') AS ContextLabel
+FROM dbo.Answers a
+JOIN dbo.Questions q ON a.QuestionId = q.Id
+JOIN dbo.Interviews i ON a.InterviewId = i.SampleDataRecordId
+JOIN dbo.Surveys s ON q.SurveyId = s.Id
+LEFT JOIN dbo.QuestionCategories qc ON a.CategoryValueId = qc.Id
+LEFT JOIN dbo.QuestionContextLists qcl ON q.Id = qcl.QuestionId
+LEFT JOIN dbo.ContextListItems cli ON qcl.ContextListId = cli.ContextListId
+ WHERE s.NfieldSurveyId = @surveyId
       `;
 
       if (interviewId) {
         request.input("interviewId", sql.Int, interviewId);
         query += ` AND i.NfieldInterviewId = @interviewId`;
       }
+
+      query += `
+      GROUP BY 
+  a.Id,
+  a.AlphaValue,
+  a.InterviewId,
+  a.NumericValue,
+  a.QuestionId,
+  a.CategoryValueId,
+  q.[Text],
+  q.NfieldQuestionId,
+  i.Id,
+  i.SampleDataRecordId,
+  i.EndTime,
+  i.StartTime,
+  i.[Status],
+  i.Successful,
+  i.ResponseCode,
+  i.ProcessTime,
+  i.LastUpdated,
+  i.NfieldInterviewId,
+  i.ActiveSeconds,
+  i.Final,
+  i.Test,
+  i.CalculatedResult,
+  qc.[Value];
+      `;
 
       const result = await request.query(query);
 

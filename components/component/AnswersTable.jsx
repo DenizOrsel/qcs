@@ -31,17 +31,25 @@ const AnswersTable = ({
         (file) => file.filename === "auditlog.json"
       );
       if (auditFile) {
-        setAuditLog(auditFile.content); // Assuming auditFile.content is the parsed JSON
-
-        // Extract elapsed times for each question from the audit log
+        setAuditLog(auditFile.content);
         const elapsedTimesMap = auditFile.content.reduce((acc, logEntry) => {
-          acc[logEntry.QuestionId] = logEntry.ElapsedTime;
+          const baseQuestionId = logEntry.QuestionId.replace(/^R\d+/, "");
+
+          const elapsedTime = parseFloat(logEntry.ElapsedTime);
+          if (acc[baseQuestionId]) {
+            acc[baseQuestionId] += elapsedTime;
+          } else {
+            acc[baseQuestionId] = elapsedTime;
+          }
+
           return acc;
         }, {});
-
+        for (let key in elapsedTimesMap) {
+          elapsedTimesMap[key] = elapsedTimesMap[key].toFixed(2);
+        }
         setElapsedTimes(elapsedTimesMap);
       }
-      setLoadingAuditLog(false); // Audit log has been processed
+      setLoadingAuditLog(false);
     }
   }, [downloadedFiles]);
 
@@ -64,7 +72,26 @@ const AnswersTable = ({
           });
 
           const data = response.data;
-          const grouped = data.reduce((acc, answer) => {
+          const manipulatedData = data.map((answer) => {
+            if (answer.ContextLabel && answer.NfieldQuestionId) {
+              const sameQuestionIds = data.filter(
+                (item) =>
+                  item.NfieldQuestionId === answer.NfieldQuestionId &&
+                  item.ContextLabel
+              );
+
+              const contextLabels = answer.ContextLabel.split(",").map(
+                (label) => label.trim()
+              );
+              const index = sameQuestionIds.indexOf(answer);
+              return {
+                ...answer,
+                ContextLabel: contextLabels[index] || answer.ContextLabel,
+              };
+            }
+            return answer;
+          });
+          const grouped = manipulatedData.reduce((acc, answer) => {
             const isSubQuestion = /F\d+$/.test(answer.NfieldQuestionId);
             const mainQuestionKey = isSubQuestion
               ? answer.NfieldQuestionId.replace(/F\d+$/, "")
@@ -85,6 +112,7 @@ const AnswersTable = ({
             }
 
             const values = [
+              answer.ContextLabel,
               answer.AlphaValue,
               answer.NumericValue,
               answer.CategoryValueText,
@@ -99,7 +127,7 @@ const AnswersTable = ({
               } else {
                 acc[mainQuestionKey].answers.push({
                   label: null,
-                  value: values.join(", "),
+                  value: values.join(": "),
                 });
               }
             }
@@ -111,7 +139,7 @@ const AnswersTable = ({
           console.error("Error fetching answers:", error);
           setError("Error fetching answers");
         } finally {
-          setLoadingAnswers(false); // Answers have been processed
+          setLoadingAnswers(false);
           onLoaded();
         }
       };
@@ -158,7 +186,9 @@ const AnswersTable = ({
                 <strong>{groupedAnswers[questionKey]?.originalKey}</strong>{" "}
                 {groupedAnswers[questionKey]?.questionText}{" "}
                 {elapsedTimes[questionKey] !== undefined ? (
-                  <span className="font-mono">(Duration: {elapsedTimes[questionKey]}s)</span>
+                  <span className="font-mono">
+                    (Duration: {elapsedTimes[questionKey]}s)
+                  </span>
                 ) : (
                   <SkeletonTheme color="#e5e7eb" highlightColor="#B6B6B6">
                     <Skeleton width={100} />
