@@ -15,7 +15,7 @@ const AnswersTable = ({
   renderAnswerWithImages,
   onLoaded,
   downloadedFiles,
-  currentQuestionId,
+  currentQuestionId
 }) => {
   const [groupedAnswers, setGroupedAnswers] = useState({});
   const [loadingAnswers, setLoadingAnswers] = useState(true);
@@ -148,7 +148,7 @@ const AnswersTable = ({
 
       fetchAnswers();
     }
-  }, [surveyId, interviewId, onLoaded, auditLog]);
+  }, [surveyId, interviewId, onLoaded, auditLog, dbConfig]);
 
   const handleSearch = (e) => setSearch(e.target.value);
 

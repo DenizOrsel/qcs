@@ -31,13 +31,27 @@ export default function Audioplayback({ audioSrc, downloadedFiles, onQuestionCha
 
   useEffect(() => {
     const currentMarker = markers.find(
-      (marker) => seek >= marker.startTime && seek <= marker.endTime
+      (marker) => seek > marker.startTime && seek < marker.endTime
     );
 
     if (currentMarker) {
       onQuestionChange(processQuestionId(currentMarker.label));
     }
   }, [seek, markers, onQuestionChange]);
+
+    const handleSearchQueryChange = (e) => {
+      const query = e.target.value;
+      setSearchQuery(query);
+
+      const marker = markers.find((m) =>
+        m.label.toLowerCase().startsWith(query.toLowerCase())
+      );
+      if (marker && howlerRef.current) {
+        howlerRef.current.seek(marker.startTime);
+        setSeek(marker.startTime);
+        onQuestionChange(processQuestionId(marker.label));
+      }
+    };
 
   const rainbowColors = [
     "red",
@@ -84,19 +98,6 @@ export default function Audioplayback({ audioSrc, downloadedFiles, onQuestionCha
   const toggleMute = () => {
     setMuted(!muted);
     howlerRef.current.mute(!muted);
-  };
-
-  const handleSearchQueryChange = (e) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-
-    const marker = markers.find((m) =>
-      m.label.toLowerCase().startsWith(query.toLowerCase())
-    );
-    if (marker && howlerRef.current) {
-      howlerRef.current.seek(marker.startTime);
-      setSeek(marker.startTime);
-    }
   };
 
   return (

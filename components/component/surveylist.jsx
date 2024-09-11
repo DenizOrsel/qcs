@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Input } from "@/components/ui/input";
+import QuotaButton from "@/components/ui/quotaButton";
 import {
   Table,
   TableHeader,
@@ -122,6 +123,11 @@ export default function Surveylist({ region, domainname, dbConfig }) {
   const handleRowClick = (surveyId) => {
     router.push(`/dashboard/${surveyId}`);
   };
+
+  const quotaHandler = (event, surveyId) => {
+    event.stopPropagation();
+    router.push(`/quota/${surveyId}`);
+  }
 
   return (
     <div className="min-h-screen">
@@ -265,6 +271,9 @@ export default function Surveylist({ region, domainname, dbConfig }) {
                     <TableCell>{survey.InterviewQualityCounts[2]}</TableCell>
                     <TableCell>{survey.InterviewQualityCounts[3]}</TableCell>
                     <TableCell>{taskCompletion}%</TableCell>
+                    <TableCell onClick={(event) => quotaHandler(event, survey.SurveyId)} className="z-50">
+                      <QuotaButton className="z-50" />
+                    </TableCell>
                   </TableRow>
                 );
               })}

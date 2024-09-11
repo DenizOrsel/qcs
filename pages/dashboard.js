@@ -2,7 +2,6 @@ import { useEffect, useState, useContext } from "react";
 import { useRouter } from "next/router";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Surveylist from "@/components/component/surveylist";
-import LogoutButton from "@/components/ui/LogoutButton";
 import { AppContext } from "@/context/AppContext";
 
 export default function Dashboard() {
