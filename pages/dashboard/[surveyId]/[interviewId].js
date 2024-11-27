@@ -309,6 +309,7 @@ const renderAnswerWithImages = (answer) => {
                     "Reject"
                   )}
                 </Button>
+                <Button className="ml-2 min-w-[100px]" variant="outline">Mark to Reject</Button>
               </div>
             </div>
             <div className="mt-6 grid grid-cols-1 gap-6 rounded-lg border bg-card p-6 shadow-sm sm:grid-cols-2">

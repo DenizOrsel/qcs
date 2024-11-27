@@ -229,6 +229,17 @@ export default function Qcontrol() {
                 </span>
               )}
             </TableHead>
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("UpdatedBy")}
+            >
+              Updated By
+              {sort.key === "UpdatedBy" && (
+                <span className="ml-1">
+                  {sort.order === "asc" ? "\u2191" : "\u2193"}
+                </span>
+              )}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -273,6 +284,7 @@ export default function Qcontrol() {
               <TableCell>
                 {new Date(interview.EndTime).toLocaleString()}
               </TableCell>
+              <TableCell>Username</TableCell>
             </TableRow>
           ))}
         </TableBody>
