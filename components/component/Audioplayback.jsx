@@ -131,6 +131,29 @@ export default function Audioplayback({ audioSrc, downloadedFiles, onQuestionCha
             onValueChange={([value]) => handleSliderChange(value)}
           />
 
+          {/* Display the question name above the slider thumb */}
+          {markers.map((marker, index) => {
+            if (seek >= marker.startTime && seek <= marker.endTime) {
+              const left = (seek / duration) * 100;
+              return (
+                <div
+                  key={`thumb-question-${index}`}
+                  style={{
+                    position: "absolute",
+                    left: `${left}%`,
+                    transform: "translateX(-50%)",
+                    top: "-30px",
+                    zIndex: 2,
+                  }}
+                  className="bg-primary text-white text-xs px-2 py-1 rounded"
+                >
+                  {processQuestionId(marker.label)}
+                </div>
+              );
+            }
+            return null;
+          })}
+
           {markers.map((marker, index) => {
             const start = marker.startTime;
             const end = marker.endTime;
@@ -168,7 +191,7 @@ export default function Audioplayback({ audioSrc, downloadedFiles, onQuestionCha
                 flexDirection: "column",
               }}
             >
-              {/* Triangle pointing right */}
+              {/* Triangle pointing right
               <div
                 className="text-primary"
                 style={{
@@ -181,7 +204,9 @@ export default function Audioplayback({ audioSrc, downloadedFiles, onQuestionCha
                   marginLeft: "7px",
                 }}
               ></div>
-              {/* Question label */}
+               */}
+
+              {/* Question label 
               <div
                 className="text-primary"
                 style={{
@@ -192,6 +217,7 @@ export default function Audioplayback({ audioSrc, downloadedFiles, onQuestionCha
               >
                 {marker.label}
               </div>
+              */}
             </div>
           ))}
         </div>
