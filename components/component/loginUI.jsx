@@ -65,6 +65,9 @@ export default function LoginUI() {
       AsiaPacific: "https://apiap.nfieldmr.com/v1/",
       China: "https://apicn.nfieldmr.com/v1/",
       Purple: "https://purple-api.niposoftware-dev.com/v1/",
+      Red: "https://red-api.niposoftware-dev.com/v1/",
+      Green: "https://green-api.niposoftware-dev.com/v1/",
+      Yellow: "https://yellow-api.niposoftware-dev.com/v1/",
     };
 
     const apiUrl = apiUrls[selectedRegion];
@@ -100,6 +103,9 @@ export default function LoginUI() {
                 <option value="Americas">AMER</option>
                 <option value="China">China</option>
                 <option value="Purple">Purple</option>
+                <option value="Red">Red</option>
+                <option value="Green">Green</option>
+                <option value="Yellow">Yellow</option>
               </select>
             </div>
             <div className="space-y-1 mt-3">
