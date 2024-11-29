@@ -145,7 +145,7 @@ export default function Audioplayback({ audioSrc, downloadedFiles, onQuestionCha
                     top: "-30px",
                     zIndex: 2,
                   }}
-                  className="bg-primary text-white text-xs px-2 py-1 rounded"
+                  className="bg-primary text-white dark:text-gray-900 text-xs px-2 py-1 rounded"
                 >
                   {processQuestionId(marker.label)}
                 </div>
