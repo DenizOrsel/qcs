@@ -51,7 +51,7 @@ export default async function handler(req, res) {
   STRING_AGG(cli.Label, ', ') AS ContextLabel
 FROM dbo.Answers a
 JOIN dbo.Questions q ON a.QuestionId = q.Id
-JOIN dbo.Interviews i ON a.InterviewId = i.SampleDataRecordId
+JOIN dbo.Interviews i ON a.InterviewId = i.Id
 JOIN dbo.Surveys s ON q.SurveyId = s.Id
 LEFT JOIN dbo.QuestionCategories qc ON a.CategoryValueId = qc.Id
 LEFT JOIN dbo.QuestionContextLists qcl ON q.Id = qcl.QuestionId
