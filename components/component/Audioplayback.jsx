@@ -125,7 +125,7 @@ export default function Audioplayback({ audioSrc, downloadedFiles, onQuestionCha
         {/* Slider */}
         <div className="flex-1 mx-4 mt-3 relative">
           <Slider
-            className="w-full cursor-grab z-10 [&>span:first-child]:h-1 [&>span:first-child]:bg-primary/30 [&_[role=slider]]:bg-primary [&_[role=slider]]:w-3 [&_[role=slider]]:h-3 [&_[role=slider]]:border-0 [&>span:first-child_span]:bg-primary [&_[role=slider]:focus-visible]:ring-0 [&_[role=slider]:focus-visible]:ring-offset-0 [&_[role=slider]:focus-visible]:scale-105 [&_[role=slider]:focus-visible]:transition-transform"
+            className="w-full cursor-grab z-10 [&>span:first-child]:h-1 [&>span:first-child]:bg-primary/0 [&_[role=slider]]:bg-primary [&_[role=slider]]:w-3 [&_[role=slider]]:h-3 [&_[role=slider]]:border-0 [&>span:first-child_span]:bg-primary [&_[role=slider]:focus-visible]:ring-0 [&_[role=slider]:focus-visible]:ring-offset-0 [&_[role=slider]:focus-visible]:scale-105 [&_[role=slider]:focus-visible]:transition-transform"
             value={[seek]}
             max={duration}
             onValueChange={([value]) => handleSliderChange(value)}
@@ -153,7 +153,7 @@ export default function Audioplayback({ audioSrc, downloadedFiles, onQuestionCha
             }
             return null;
           })}
-
+          {/* Slider should be in rainbow colors */}
           {markers.map((marker, index) => {
             const start = marker.startTime;
             const end = marker.endTime;
@@ -165,6 +165,7 @@ export default function Audioplayback({ audioSrc, downloadedFiles, onQuestionCha
               <div
                 key={index}
                 style={{
+                  top: 0,
                   position: "absolute",
                   left: `${left}%`,
                   width: `${width}%`,
@@ -176,50 +177,6 @@ export default function Audioplayback({ audioSrc, downloadedFiles, onQuestionCha
               />
             );
           })}
-          {markers.map((marker, index) => (
-            <div
-              key={index}
-              style={{
-                position: "absolute",
-                left: `${(marker.startTime / duration) * 100}%`,
-                transform: "translateX(-50%)",
-                top: "-10px",
-                zIndex: 2,
-                pointerEvents: "none",
-                display: "flex",
-                alignItems: "center",
-                flexDirection: "column",
-              }}
-            >
-              {/* Triangle pointing right
-              <div
-                className="text-primary"
-                style={{
-                  width: 0,
-                  height: 0,
-                  borderLeft: "6px solid",
-                  borderTop: "6px solid transparent",
-                  borderBottom: "6px solid transparent",
-                  marginTop: "18px",
-                  marginLeft: "7px",
-                }}
-              ></div>
-               */}
-
-              {/* Question label 
-              <div
-                className="text-primary"
-                style={{
-                  fontSize: "10px",
-                  marginLeft: "26px",
-                  marginTop: "0px",
-                }}
-              >
-                {marker.label}
-              </div>
-              */}
-            </div>
-          ))}
         </div>
 
         {/* Duration and Volume Control */}

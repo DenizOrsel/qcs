@@ -181,6 +181,15 @@ const AnswersTable = ({
 
   if (error) return <Error error={error} />;
 
+const rainbowColors = [
+  "rgba(255, 0, 0, 0.15)", // red
+  "rgba(255, 165, 0, 0.15)", // orange
+  "rgba(255, 255, 0, 0.15)", // yellow
+  "rgba(0, 128, 0, 0.15)", // green
+  "rgba(75, 0, 130, 0.15)", // indigo
+  "rgba(238, 130, 238, 0.15)", // violet
+];
+
   return (
     <div className="mt-6 rounded-lg border bg-card p-6 shadow-sm mb-20">
       <h2 className="text-lg font-medium">Answers</h2>
@@ -198,10 +207,14 @@ const AnswersTable = ({
                 ref={(el) => (questionRefs.current[questionKey] = el)}
                 className={`text-sm font-medium text-muted-foreground mt-5 ${
                   currentQuestionId === questionKey
-                    ? "bg-yellow-200 rounded dark:bg-yellow-800"
+                    ? "rounded dark:bg-yellow-800"
                     : ""
                 }`}
                 style={{
+                  backgroundColor:
+                    currentQuestionId === questionKey
+                      ? rainbowColors[index % rainbowColors.length]
+                      : "",
                   transition: "background-color 0.5s ease", // Add smooth transition
                 }}
               >
